@@ -5,69 +5,91 @@
 
 {% block content %}
 
-<div class="d-flex ">
-  <div class = "mediapip-container">
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.1/camera_utils.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils@0.1/control_utils.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.2/drawing_utils.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.2/pose.js" crossorigin="anonymous"></script>
-    <canvas class="output" width="480px" height="480px"></canvas>
-    <video class="input_video" width="0px" height="0px"></video>
-    <div class="loading">
-      <div class="spinner"></div>
-    </div>
-    <div style="visibility: hidden" class="control">
-    </div>
-
-    <div class="landmark-grid-container"></div>
-    <script type="text/javascript" src= "{% static 'js/PushUp.js' %}" ></script>
-  </div>
-
-  <div class="logo-container">
-    <div class="game-container"></div>
+<div class="HQ_container">
+  
+  <div class="game-container" >
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.54.0/dist/phaser.min.js"></script>
-    <script src="{% static 'js/game.js'%}">
+    <div id="game-container" ></div>
+    
+    <script src="{% static 'js/game.js'%}"></script>
+  </div>
+
+  {% comment %} STUTS {% endcomment %}
+
+  <div id="popup" class="popup">
+    <div class="popup-content">
+      <h2>Choose an option:</h2>
+      <button id="pushup" class="popup-button">pushup</button>
+      <button id="situp" class="popup-button">situp</button>
+      <button id="squat" class="popup-button">squat</button>
+    </div>
+  </div>
+
+  <div class="buddies-container" style="margin-left: auto">
+    {% for buddy in buddies %}
+    <div class="buddy-card">
+      <h3>Buddy Name: {{ buddy.name }}</h3>
+  
+      <p>Arm power: <span id="arm-power-{{ buddy.id }}"></span></p>
+      <p>Leg power: <span id="leg-power-{{ buddy.id }}"></span></p>
+      <p>Body power: <span id="body-power-{{ buddy.id }}"></span></p>
+      
+    </div>
+  
+    <script>
+
+      // Get the power values for the current buddy
+      const buddyName = '{{ buddy.name }}'
+      
+      const armPower = {{ buddy.armpower }};
+      const legPower = {{ buddy.legpower }};
+      const bodyPower = {{ buddy.bodypower }};
+  
+      // Calculate the level and EXP percentages for each power
+      const armLevel = Math.floor(armPower / 10);
+      const armExp = ((armPower / 10) - armLevel) * 100;
+      const legLevel = Math.floor(legPower / 10);
+      const legExp = ((legPower / 10) -legLevel) * 100;
+      const bodyLevel = Math.floor(bodyPower / 10);
+      const bodyExp = ((bodyPower / 10) - Math.floor(bodyPower / 10)) * 100;
+  
+      // Display the power values as level and % EXP
+      const armPowerElem = document.getElementById("arm-power-{{ buddy.id }}");
+      armPowerElem.textContent = `Level ${armLevel} (${armExp}% EXP)`;
+      armPowerElem.style.width = `${armExp}%`;
+      armPowerElem.style.backgroundColor = armExp >= 50 ? "#4CAF50" : "#ddd";
+  
+      const legPowerElem = document.getElementById("leg-power-{{ buddy.id }}");
+      legPowerElem.textContent = `Level ${legLevel} (${legExp}% EXP)`;
+      legPowerElem.style.width = `${legExp}%`;
+      legPowerElem.style.backgroundColor = legExp >= 50 ? "#4CAF50" : "#ddd";
+  
+      const bodyPowerElem = document.getElementById("body-power-{{ buddy.id }}");
+      bodyPowerElem.textContent = `Level ${bodyLevel} (${bodyExp}% EXP)`;
+      bodyPowerElem.style.width = `${bodyExp}%`;
+      bodyPowerElem.style.backgroundColor = bodyExp >= 50 ? "#4CAF50" : "#ddd";
+
+
+      function showPopup() {
+        // Show the popup
+        document.getElementById("popup").style.display = "block";
+      
+        // Set onclick events for the buttons
+        document.getElementById("pushup").onclick = function() {
+          window.location.href = "/pushup"; // Redirect to option1 page
+        };
+        document.getElementById("situp").onclick = function() {
+          window.location.href = "/situp"; // Redirect to option2 page
+        };
+        document.getElementById("squat").onclick = function() {
+          window.location.href = "/squat"; // Redirect to option3 page
+        };
+      }
     </script>
-  </div>
-</div>
 
-<div class="buddies-container">
-  {% for buddy in buddies %}
-  <div class="buddy-card">
-    <h3>{{ buddy.name }}</h3>
-    <p>Skin name: {{ buddy.skinname }}</p>
-    <p>Arm power: {{ buddy.armpower }}</p>
-    <p>Leg power: {{ buddy.legpowr }}</p>
-    <p>Body power: {{ buddy.bodypower }}</p>
+    <button onclick="showPopup()">Show popup</button>
+  
+    {% endfor %}
+    
   </div>
-  <script>
-    const skinName = "{{ buddies.0.skinname }}";
-    const armPower = "{{ buddies.0.armpower }}";
-    const legPower = "{{ buddies.0.legpower }}";
-    const bodyPower = "{{ buddies.0.bodypower }}";
-  </script>
-  {% endfor %}
-</div>
-
 {% endblock content %}
-
-<style>
-  .buddies-container{
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    margin-top: 20px;
-  }
-
-  .buddy-card{
-    background-color: #f5f5f5;
-    padding: 10px;
-    border-radius: 5px;
-    margin-bottom: 10px;
-    width
-  }
-  .game-container{
-    width: 800px;
-    height: 1200px;
-    margin: auto;
-  }

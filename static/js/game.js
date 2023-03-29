@@ -1,10 +1,7 @@
-
-
-
 const config = {
         type: Phaser.AUTO,
-        width: 800,
-		height: 1200,
+        width: 600,
+		height: 800,
 		parent: 'game-container',
         scene: {
             preload: preload,
@@ -23,7 +20,7 @@ const config = {
 	function create() {
 		// Create the character page
 		// Add background image
-		this.add.image(400, 600, 'background');
+		this.add.image(300, 400, 'background');
 	
 		// Add character image
 		this.anims.create({
@@ -37,29 +34,24 @@ const config = {
 			frames : this.anims.generateFrameNumbers('player', { start : 4, end : 6}),
 			frameRate : 5
 		});
-		this.player = this.add.sprite(400, 600, 'player');
-		console.log(`${armPower}`)
+		this.player = this.add.sprite(300, 400, 'player');
 		this.player.play('egg_idle');
 		
 		// Add text
-		var text = this.add.text(400, 100, 'Buddy Minecraft', {
-			fontSize: '62px',
+		var text = this.add.text(300, 100, buddyName, {
+			fontSize: '42px',
 			fontFamily: 'minecraft',
 			fill: '#fff'
 		});
 		text.setOrigin(0.5, 0.5);
+		console.log(buddyName)
 	
 		
 	}
 	
 	function update() {
 		// Update any logic for the character page
-		if(count == 1){
-            console.log(count);
-			this.player.play('pushup');
-            count++;
-            
-        }
+
 	}
     
     // สร้างเกม
