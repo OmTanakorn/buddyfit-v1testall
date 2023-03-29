@@ -179,3 +179,27 @@ body {
 .save-btn:hover {
   background-color: #3e8e41;
 }
+
+.arm-power {
+  position: absolute;
+  right: 825px;
+  bottom: 750px;
+  font-weight: bold;
+  font-size: 24px;
+}
+
+.body-power {
+  position: absolute;
+  right: 820px;
+  bottom: 600px;
+  font-weight: bold;
+  font-size: 24px;
+}
+
+.leg-power {
+  position: absolute;
+  right: 835px;
+  bottom: 415px;
+  font-weight: bold;
+  font-size: 24px;
+}
