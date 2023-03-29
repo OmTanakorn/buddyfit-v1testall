@@ -85,10 +85,10 @@ function onResultsPose(results) {
     }
     console.log(count)
 
-    canvasCtx.font = "30px Arial"
-    canvasCtx.fillStyle = "red"
-    canvasCtx.fillText(stage + ": " + counter.toString(), 320, 50)
-    canvasCtx.restore()
+    // canvasCtx.font = "30px Arial"
+    // canvasCtx.fillStyle = "white"
+    // canvasCtx.fillText("Counts: " + counter, 320, 50)
+    // canvasCtx.restore()
 
     return count
 }

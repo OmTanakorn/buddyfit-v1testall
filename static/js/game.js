@@ -1,8 +1,11 @@
 const config = {
         type: Phaser.AUTO,
-        width: 600,
-		height: 800,
+		scale: {
+			width: 600,
+			height: 800,
+		},
 		parent: 'game-container',
+		backgroundColor: '#fff',
         scene: {
             preload: preload,
             create: create,
@@ -20,7 +23,7 @@ const config = {
 	function create() {
 		// Create the character page
 		// Add background image
-		this.add.image(300, 400, 'background');
+		const BG = this.add.image(this.scale.width/2, this.scale.height/2, 'background')
 	
 		// Add character image
 		this.anims.create({
@@ -44,14 +47,11 @@ const config = {
 			fill: '#fff'
 		});
 		text.setOrigin(0.5, 0.5);
-		console.log(buddyName)
-	
-		
+		// console.log(buddyName)	
 	}
 	
 	function update() {
 		// Update any logic for the character page
-
 	}
     
     // สร้างเกม

@@ -24,6 +24,22 @@ def pushup(request):
     }
     return render(request, 'pages\pushup.html', context)
 
+def situp(request):
+    # ดึงข้อมูล Buddy ของผู้ใช้งานปัจจุบัน
+    buddies = Buddy.objects.filter(owner=request.user)
+    context = {
+        'buddies': buddies
+    }
+    return render(request, 'pages\situp.html', context)
+
+def squat(request):
+    # ดึงข้อมูล Buddy ของผู้ใช้งานปัจจุบัน
+    buddies = Buddy.objects.filter(owner=request.user)
+    context = {
+        'buddies': buddies
+    }
+    return render(request, 'pages\squat.html', context)
+
 def signup(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST)

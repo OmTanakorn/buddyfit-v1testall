@@ -1,0 +1,78 @@
+{% extends '_base.html' %}
+{% load static %}
+
+{% block title %}Push UP{% endblock title %}
+
+{% block content %}
+
+<div class="HQ_container">
+  
+  <div class="game-container" >
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.54.0/dist/phaser.min.js"></script>
+    <div id="game-container" ></div>
+    <script src="{% static 'js/gameSquat.js'%}"></script>
+    <button class="change-btn" onclick="showPopup()"><h1>Change</h1></button>
+  </div>
+
+  <div id="popup" class="popup">
+    <div class="popup-content">
+      <a class="close" id="x">x</a>
+      <h2>Choose an option:</h2>
+      <button id="pushup" class="popup-button"><img src="../static/images/Str.png" style="transform: rotate(45deg);">Push Up</button>
+      <button id="situp" class="popup-button"><img src="../../static/images/End.png">situp</button>
+      <button id="squat" class="popup-button"><img src="../../static/images/Agi.png" style="transform: rotate(15deg);">squat</button>
+    </div>
+  </div>
+
+  <div class= "Mediapipe-container">
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.1/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils@0.1/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.2/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.2/pose.js" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+      function showPopup() {
+        // Show the popup
+        document.getElementById("popup").style.display = "block";
+      
+        // Set onclick events for the buttons
+        document.getElementById("pushup").onclick = function() {
+          window.location.href = "/pushup"; // Redirect to option1 page
+        };
+        document.getElementById("situp").onclick = function() {
+          window.location.href = "/situp"; // Redirect to option2 page
+        };
+        document.getElementById("squat").onclick = function() {
+          window.location.href = "/squat"; // Redirect to option3 page
+        };
+        document.getElementById("x").onclick = function() {
+          window.location.href = "/squat";
+        }
+      }
+    </script>
+
+    <canvas class="output" width="600px" height="800px"></canvas>
+    <button class="save-btn"><h1>Save</h1></button>
+    <video class="input_video" width="0px" height="0px"></video>            
+    <div class="loading">
+        <div class="spinner"></div>
+    </div>
+    <div style="visibility: hidden" class="control"></div>
+    <script src="../../static/js/Squat.js"></script>
+
+    <div id="countdown"></div>
+    
+
+<script>
+  // สร้างฟังก์ชัน updateCountdown ในไฟล์ pushup.html เพื่อแสดงค่า countdown ในตัวแปร pushupCountdown
+  function updateCountdown() {
+    const countdownDiv = document.getElementById('countdown');
+    const countdown = window.getSquatCountdown();
+    if (countdown === 10) {
+      countdownDiv.innerText = 'PASS';
+    }
+  }
+  setInterval(updateCountdown, 500);
+</script>
+
+  </div>
+{% endblock content %}

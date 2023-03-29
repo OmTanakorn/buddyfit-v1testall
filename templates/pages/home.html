@@ -18,25 +18,38 @@
 
   <div id="popup" class="popup">
     <div class="popup-content">
+      <a class="close" id="x">x</a>
       <h2>Choose an option:</h2>
-      <button id="pushup" class="popup-button">pushup</button>
-      <button id="situp" class="popup-button">situp</button>
-      <button id="squat" class="popup-button">squat</button>
+      <button id="pushup" class="popup-button"><img src="../static/images/Str.png" style="transform: rotate(45deg);">Push Up</button>
+      <button id="situp" class="popup-button"><img src="../../static/images/End.png">situp</button>
+      <button id="squat" class="popup-button"><img src="../../static/images/Agi.png" style="transform: rotate(15deg);">squat</button>
     </div>
   </div>
 
   <div class="buddies-container" style="margin-left: auto">
     {% for buddy in buddies %}
+    <div class="BuddyFit">
+      <h1>Buddy Fit</h1>
+    </div>
+
     <div class="buddy-card">
-      <h3>Buddy Name: {{ buddy.name }}</h3>
-  
-      <p>Arm power: <span id="arm-power-{{ buddy.id }}"></span></p>
-      <p>Leg power: <span id="leg-power-{{ buddy.id }}"></span></p>
-      <p>Body power: <span id="body-power-{{ buddy.id }}"></span></p>
+      <h3>Name: {{ buddy.name }}</h3>
+      <h3>Evolution: </h3>
+      <br>
+      <h5>Next evolution</h5>
       
+      <!-- next evo bar -->
     </div>
   
-    <script>
+    <div class="status-container" >
+      <p><img src="../../static/images/Str.png" style="transform: rotate(45deg);"><span id="arm-power-{{ buddy.id }}"></span></p>
+      <p><img src="../../static/images/End.png"><span id="leg-power-{{ buddy.id }}"></span></p>
+      <p><img src="../../static/images/Agi.png" style="transform: rotate(15deg);"><span id="body-power-{{ buddy.id }}"></span></p>
+    </div>
+
+    <!-- <progress value="50" max="100"></progress> -->
+
+    <script type="text/javascript">
 
       // Get the power values for the current buddy
       const buddyName = '{{ buddy.name }}'
@@ -84,10 +97,13 @@
         document.getElementById("squat").onclick = function() {
           window.location.href = "/squat"; // Redirect to option3 page
         };
+        document.getElementById("x").onclick = function() {
+          window.location.href = "/"; // Redirect to option3 page
+        };
       }
     </script>
 
-    <button onclick="showPopup()">Show popup</button>
+    <button class="train-btn" onclick="showPopup()"><h1>Train</h1></button>
   
     {% endfor %}
     
