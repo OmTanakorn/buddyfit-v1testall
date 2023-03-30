@@ -20,6 +20,8 @@ function getSquatCountdown() {
 
 function startTimer(duration, timerText) {
     var timer = duration;
+    squatCount = 0;
+    sessionStorage.setItem("squat_count", 0);
     var timerInterval = setInterval(() => {
         timer--;
         if (timer >= 0) {
@@ -118,5 +120,6 @@ function update() {
         count++;
         squatCount++;
         this.squatCountText.setText(squatCount);
+        sessionStorage.setItem("squat_count", squatCount);
     }
 }

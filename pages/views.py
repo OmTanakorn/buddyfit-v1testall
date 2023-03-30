@@ -1,10 +1,10 @@
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import UserCreationForm
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from accounts.models import Buddy
 
-from accounts.forms import SignUpForm
+from accounts.forms import BuddyForm
 
 
 @login_required
@@ -40,17 +40,44 @@ def squat(request):
     }
     return render(request, 'pages\squat.html', context)
 
-def signup(request):
+def create_buddy(request):
     if request.method == 'POST':
-        form = SignUpForm(request.POST)
+        form = BuddyForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            buddy_name = form.cleaned_data.get('buddy_name')  # อ่านข้อมูลชื่อ Buddy Name จากฟอร์ม
-            buddy = Buddy.objects.create(name=buddy_name, owner=user)  # สร้างโมเดล Buddy และเชื่อมต่อกับผู้ใช้
-
-            # Login user
-            login(request, user)
-            return redirect('home')
+            buddy = form.save(commit=False)
+            buddy.owner = request.user
+            buddy.save()
+            return redirect('/')
     else:
-        form = SignUpForm()
-    return render(request, 'account/signup.html', {'form': form})
+        form = BuddyForm()
+    return render(request, 'pages\create.html', {'form': form})
+
+def update_pushup(request):
+    if request.method == 'POST':
+        count = int(request.POST["pushup_count"]);
+        print("Get post with push up count = ", count)
+        owner = request.user
+        buddy = get_object_or_404(Buddy, owner=owner)
+        buddy.armpower += count
+        buddy.save()
+    return redirect('/')
+
+def update_situp(request):
+    if request.method == 'POST':
+        count = int(request.POST["situp_count"]);
+        print("Get post with sit up count = ", count)
+        owner = request.user
+        buddy = get_object_or_404(Buddy, owner=owner)
+        buddy.bodypower += count
+        buddy.save()
+    return redirect('/')
+
+def update_squat(request):
+    if request.method == 'POST':
+        count = int(request.POST["squat_count"]);
+        print("Get post with squat count = ", count)
+        owner = request.user
+        buddy = get_object_or_404(Buddy, owner=owner)
+        buddy.legpower += count
+        buddy.save()
+    return redirect('/')

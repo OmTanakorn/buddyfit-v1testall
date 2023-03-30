@@ -146,12 +146,6 @@ body {
   text-align: center;
 }
 
-.status-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
 /* change button */
 .change-btn {
   margin-top: 10px;
@@ -180,26 +174,32 @@ body {
   background-color: #3e8e41;
 }
 
+.status-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .arm-power {
-  position: absolute;
-  right: 825px;
-  bottom: 750px;
   font-weight: bold;
   font-size: 24px;
+  margin-top: -20px; /* เลื่อนขึ้นสูงขึ้นเพื่อให้ติดกับรูปภาพ */
 }
 
 .body-power {
-  position: absolute;
-  right: 820px;
-  bottom: 600px;
   font-weight: bold;
   font-size: 24px;
+  margin-top: -20px; /* เลื่อนขึ้นสูงขึ้นเพื่อให้ติดกับรูปภาพ */
 }
 
 .leg-power {
-  position: absolute;
-  right: 835px;
-  bottom: 415px;
   font-weight: bold;
   font-size: 24px;
+  margin-top: -20px; /* เลื่อนขึ้นสูงขึ้นเพื่อให้ติดกับรูปภาพ */
 }
+
+/* ใช้กำหนดขนาดรูปภาพแต่ละรูปได้ตามต้องการ */
+/* img {
+  width: 100px;
+  height: 100px;
+} */

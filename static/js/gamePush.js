@@ -95,6 +95,8 @@ function create() {
 }
 
 function startTimer(duration, timerText) {
+    pushupCount = 0;
+    sessionStorage.setItem("pushup_count", 0);
     var timer = duration;
     var timerInterval = setInterval(() => {
         timer--;
@@ -122,6 +124,7 @@ function update() {
         count++;
         pushupCount++;
         this.pushupCountText.setText( pushupCount);
+        sessionStorage.setItem("pushup_count", pushupCount);
     }
 
 }

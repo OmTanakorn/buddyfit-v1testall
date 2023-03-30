@@ -20,6 +20,8 @@ function getSitupCountdown() {
 
 function startTimer(duration, timerText) {
     var timer = duration;
+    situpCount = 0;
+    sessionStorage.setItem("situp_count", 0);
     var timerInterval = setInterval(() => {
         timer--;
         if (timer >= 0) {
@@ -118,5 +120,6 @@ function update() {
         count++;
         situpCount++;
         this.situpCountText.setText(situpCount);
+        sessionStorage.setItem("situp_count", situpCount);
     }
 }

@@ -15,6 +15,8 @@
   <form method="post">
     {% csrf_token %}
     {{ form|crispy }}
+
+    <input type="hidden" name="{{ redirect_field_name }}" value="/create-buddy/" />
     <button class="btn btn-success" type="submit">Sign up</button>
   </form>
 </div>

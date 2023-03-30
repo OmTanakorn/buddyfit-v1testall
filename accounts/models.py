@@ -12,9 +12,9 @@ class CustomUser(AbstractUser):
 class Buddy(models.Model):
     name = models.CharField(max_length=255)
     skinname = models.CharField(max_length=255)
-    armpower = models.IntegerField()
-    legpower = models.IntegerField()
-    bodypower = models.IntegerField()
+    armpower = models.IntegerField(default=0)
+    legpower = models.IntegerField(default=0)
+    bodypower = models.IntegerField(default=0)
     owner = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     
     def __str__(self):
@@ -27,5 +27,4 @@ class ExHistory(models.Model):
     owner = models.ForeignKey(get_user_model() , on_delete=models.CASCADE)
     def __str__(self):
         return str(self.owner) + " เล่นท่า " +self.exType+ ' จำนวน : ' + str(self.exCount)
-
 

@@ -51,7 +51,14 @@
     </script>
 
     <canvas class="output" width="600px" height="800px"></canvas>
-    <button class="save-btn"><h1>Save</h1></button>
+
+    <form action="/update_situp" method="post">
+      {% csrf_token %}
+      <input type="hidden"  name="situp_count" id="CountSitup">
+      <button class="save-btn"><h1>Done</h1></button>
+    </form>
+
+    
     <video class="input_video" width="0px" height="0px"></video>            
     <div class="loading">
       <div class="spinner"></div>
@@ -69,6 +76,8 @@
     const countdown = window.getSitupCountdown();
     if (countdown === 10) {
       countdownDiv.innerText = 'PASS';
+      document.getElementById("CountSitup").value = sessionStorage.getItem("situp_count");
+      setInterval(updateCountdown, 0);
     }
   }
   setInterval(updateCountdown, 500);

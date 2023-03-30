@@ -1,9 +1,14 @@
 {% extends '_base.html' %}
 {% load static %}
 
+
 {% block title %}Push UP{% endblock title %}
 
 {% block content %}
+
+
+
+
 
 <div class="HQ_container">
   
@@ -51,25 +56,31 @@
     </script>
 
     <canvas class="output" width="600px" height="800px"></canvas>
-    <button class="save-btn"><h1>Save</h1></button>
+
+    {% comment %} สำหรับบันทึกค่า {% endcomment %}
+    <form action="/update" method="post">
+      {% csrf_token %}
+      <input type="hidden"  name="pushup_count" id="CountPushup">
+      <button class="save-btn"><h1>Done</h1></button>
+    </form>
     <video class="input_video" width="0px" height="0px"></video>            
     <div class="loading">
       <div class="spinner"></div>
     </div>
     <div style="visibility: hidden" class="control"></div>
     <script src="../static/js/PushUp.js"></script>
-    <p></p>
-    
-    <div id="countdown"></div>
-    
+   
+    <script >
 
-    <script>
+      document.getElementById("CountPushup").value = "Hello WOrld";
       // สร้างฟังก์ชัน updateCountdown ในไฟล์ pushup.html เพื่อแสดงค่า countdown ในตัวแปร pushupCountdown
       function updateCountdown() {
-        const countdownDiv = document.getElementById('countdown');
+        //const countdownDiv = document.getElementById('countdown');
         const countdown = window.getPushupCountdown();
         if (countdown === 10) {
-          countdownDiv.innerText = 'PASS';
+          //countdownDiv.innerText = 'PASS';
+          document.getElementById("CountPushup").value = sessionStorage.getItem("pushup_count");
+          setInterval(updateCountdown, 0);
         }
       }
       setInterval(updateCountdown, 500);

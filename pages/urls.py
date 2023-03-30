@@ -9,5 +9,8 @@ urlpatterns = [
     path('pushup/', views.pushup, name='pushup'),
     path('situp/', views.situp, name='situp'),
     path('squat/', views.squat, name='squat'),
-    path('signup/', views.signup, name='signup'),
+    path('create_buddy/', views.create_buddy, name='create_buddy'),
+    path('update_pushup',views.update_pushup,name='update_pushup'),
+    path('update_situp',views.update_situp,name='update_situp'),
+    path('update_squat',views.update_squat,name='update_squat'),
 ]

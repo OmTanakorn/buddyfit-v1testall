@@ -1,9 +1,32 @@
 {% extends '_base.html' %}
+{% load static %}
+
+{% block title %}Create Buddy{% endblock title %}
+
 {% block content %}
-  <h1>Create a new Buddy</h1>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Save</button>
-  </form>
-{% endblock %}
+
+<div class="HQ_container">
+  
+  <div class="game-container" >
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.54.0/dist/phaser.min.js"></script>
+    <div id="game-container" ></div>
+    
+    <script src="{% static 'js/egg_random.js'%}"></script>
+  </div>
+
+  {% comment %} STUTS {% endcomment %}
+  <div class="Create-Buddy">
+    <h1>Create a new Buddy</h1>
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit">Save</button>
+    </form>
+  </div>
+  <script>
+    const buddyName = '{{ buddy.name }}'
+  </script>
+
+    
+  </div>
+{% endblock content %}
