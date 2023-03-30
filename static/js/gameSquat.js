@@ -1,7 +1,7 @@
 const config = {
     type: Phaser.CANVAS,
     width: 600,
-    height: 800,
+    height: 890,
     parent: 'game-container',
     scene: {
         preload: preload,

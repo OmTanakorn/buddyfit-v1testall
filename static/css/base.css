@@ -114,18 +114,16 @@ body {
   text-align: center;
 }
 
-.popup-button {
-  margin: 10px;
-  padding: 10px 20px;
+.popup-btn {
+  margin: 20px;
+  padding: 10px 25px;
   border-radius: 100px;
-  border: none;
   background-color: #4CAF50;
   color: white;
-  font-size: 16px;
   cursor: pointer;
 }
 
-.popup-button:hover {
+.popup-btn:hover {
   background-color: #3e8e41;
 }
 
@@ -148,8 +146,13 @@ body {
 
 .status-container {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
+}
+
+.status-piece {
+  display: flex;
+  flex-direction: column;
 }
 
 /* change button */
@@ -180,26 +183,7 @@ body {
   background-color: #3e8e41;
 }
 
-.arm-power {
-  position: absolute;
-  right: 825px;
-  bottom: 750px;
-  font-weight: bold;
-  font-size: 24px;
-}
-
-.body-power {
-  position: absolute;
-  right: 820px;
-  bottom: 600px;
-  font-weight: bold;
-  font-size: 24px;
-}
-
-.leg-power {
-  position: absolute;
-  right: 835px;
-  bottom: 415px;
-  font-weight: bold;
-  font-size: 24px;
+.vdo-monitor {
+  display: flex;
+  flex-direction: row;
 }
