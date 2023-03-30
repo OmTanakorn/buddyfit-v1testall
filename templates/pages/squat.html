@@ -50,12 +50,13 @@
     </script>
 
     <form action="/update_squat" method="post">
+      <canvas class="output" width="600px" height="600px"></canvas>
       {% csrf_token %}
       <input type="hidden"  name="squat_count" id="CountSquat">
       <button class="save-btn"><h1>Done</h1></button>
     </form>
            
-    <canvas class="output" width="600px" height="600px"></canvas>
+    
     <video class="input_video" width="0px" height="0px" style="visibility: hidden;"></video>            
     <button class="change-btn" onclick="showPopup()"><h1>Change</h1></button>
     <div class="loading">
