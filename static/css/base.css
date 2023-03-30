@@ -144,10 +144,9 @@ body {
   text-align: center;
 }
 
-
 .status-container {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
 }
 
@@ -159,7 +158,7 @@ body {
 /* change button */
 .change-btn {
   margin-top: 10px;
-  background-color: #4CAF50;
+  background-color: cadetblue;
   color: white;
   padding: 10px 200px;
   border-radius: 50px;
@@ -167,15 +166,15 @@ body {
 }
 
 .change-btn:hover {
-  background-color: #3e8e41;
+  background-color: darkblue;
 }
 
 /* save button */
 .save-btn {
-  margin-top: 20px;
+  margin-top: 10px;
   background-color: #4CAF50;
   color: white;
-  padding: 10px 200px;
+  padding: 10px 250px;
   border-radius: 50px;
   cursor: pointer;
 }

@@ -49,17 +49,16 @@
       }
     </script>
 
+    <canvas class="output" width="600px" height="600px"></canvas>
+    <button class="change-btn" onclick="showPopup()"><h1>Change</h1></button>
 
     <form action="/update_situp" method="post">
       {% csrf_token %}
       <input type="hidden"  name="situp_count" id="CountSitup">
       <button class="save-btn"><h1>Done</h1></button>
     </form>
-
-            
-    <canvas class="output" width="600px" height="600px"></canvas>
+    
     <video class="input_video" width="0px" height="0px" style="visibility: hidden;"></video>            
-    <button class="change-btn" onclick="showPopup()"><h1>Change</h1></button>
     <div class="loading">
       <div class="spinner"></div>
     </div>

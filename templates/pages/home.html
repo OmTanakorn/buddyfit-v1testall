@@ -34,7 +34,8 @@
 
     <div class="buddy-card">
       <h3>Name: {{ buddy.name }}</h3>
-      <h3>Evolution: </h3>
+      <h3></h3>
+    </br>
     </div>
   
     <div class="status-container" >
@@ -57,11 +58,11 @@
   
       // Calculate the level and EXP percentages for each power
       const armLevel = Math.floor(armPower / 10);
-      const armExp = ((armPower / 10) - armLevel) * 100;
+      const armExp = Math.floor(((armPower / 10) - armLevel) * 100);
       const legLevel = Math.floor(legPower / 10);
-      const legExp = ((legPower / 10) -legLevel) * 100;
+      const legExp = Math.floor(((legPower / 10) - legLevel) * 100);
       const bodyLevel = Math.floor(bodyPower / 10);
-      const bodyExp = ((bodyPower / 10) - Math.floor(bodyPower / 10)) * 100;
+      const bodyExp = Math.floor(((bodyPower / 10) - bodyLevel )* 100);
   
       // Display the power values as level and % EXP
       const armPowerElem = document.getElementById("arm-power-{{ buddy.id }}");
