@@ -20,9 +20,9 @@
     <div class="popup-content">
       <a class="close" id="x">x</a>
       <h2>Choose an option:</h2>
-      <button id="pushup" class="popup-button"><img src="../static/images/Str.png" style="transform: rotate(45deg);">Push Up</button>
-      <button id="situp" class="popup-button"><img src="../../static/images/End.png">situp</button>
-      <button id="squat" class="popup-button"><img src="../../static/images/Agi.png" style="transform: rotate(15deg);">squat</button>
+        <button id="pushup" class="popup-btn"><img src="../static/images/Str.png" style="transform: rotate(45deg);"><h5>Push up</h5></button>
+        <button id="situp" class="popup-btn"><img src="../../static/images/End.png"><h5>Sit up</h5></button>
+        <button id="squat" class="popup-btn"><img src="../../static/images/Agi.png" style="transform: rotate(15deg);"><h5>Squat</h5></button>
     </div>
   </div>
 
@@ -35,16 +35,13 @@
     <div class="buddy-card">
       <h3>Name: {{ buddy.name }}</h3>
       <h3>Evolution: </h3>
-      <br>
-      <h5>Next evolution</h5>
-      
-      <!-- next evo bar -->
     </div>
   
     <div class="status-container" >
-      <p><img src="../../static/images/Str.png" style="transform: rotate(45deg);"><span id="arm-power-{{ buddy.id }}"><h6 class="arm-power">arm-power</h6></span></p>
-      <p><img src="../../static/images/End.png"><span id="body-power-{{ buddy.id }}"></span><h6 class="body-power">body-power</h6></p>
-      <p><img src="../../static/images/Agi.png" style="transform: rotate(15deg);"><span id="leg-power-{{ buddy.id }}"></span><h6 class="leg-power">leg-power</h6></p>
+      <div class="status-piece">
+        <p><img src="../../static/images/Str.png" style="transform: rotate(45deg);"><span id="arm-power-{{ buddy.id }}"><h5>arm-power</h5></span></p>
+        <p><img src="../../static/images/End.png"><span id="leg-power-{{ buddy.id }}"></span><h5>body-power</h5></p>
+        <p><img src="../../static/images/Agi.png" style="transform: rotate(15deg);"><span id="body-power-{{ buddy.id }}"></span><h5>leg-power</h5></p>
     </div>
 
     <!-- <progress value="50" max="100"></progress> -->
@@ -54,9 +51,9 @@
       // Get the power values for the current buddy
       const buddyName = '{{ buddy.name }}'
       
-      const armPower = {{ buddy.armpower }};
-      const legPower = {{ buddy.legpower }};
-      const bodyPower = {{ buddy.bodypower }};
+      var armPower = '{{ buddy.armpower }}';
+      var legPower = '{{ buddy.legpower }}';
+      var bodyPower = '{{ buddy.bodypower }}';
   
       // Calculate the level and EXP percentages for each power
       const armLevel = Math.floor(armPower / 10);

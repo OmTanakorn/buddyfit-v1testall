@@ -11,16 +11,15 @@
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.54.0/dist/phaser.min.js"></script>
     <div id="game-container" ></div>
     <script src="{% static 'js/gameSitUp.js'%}"></script>
-    <button class="change-btn" onclick="showPopup()"><h1>Change</h1></button>
   </div>
 
   <div id="popup" class="popup">
     <div class="popup-content">
       <a class="close" id="x">x</a>
       <h2>Choose an option:</h2>
-      <button id="pushup" class="popup-button"><img src="../static/images/Str.png" style="transform: rotate(45deg);">Push Up</button>
-      <button id="situp" class="popup-button"><img src="../../static/images/End.png">situp</button>
-      <button id="squat" class="popup-button"><img src="../../static/images/Agi.png" style="transform: rotate(15deg);">squat</button>
+      <button id="pushup" class="popup-btn"><img src="../static/images/Str.png" style="transform: rotate(45deg);"><h5>Push up</h5></button>
+      <button id="situp" class="popup-btn"><img src="../../static/images/End.png"><h5>Sit up</h5></button>
+      <button id="squat" class="popup-btn"><img src="../../static/images/Agi.png" style="transform: rotate(15deg);"><h5>Squat</h5></button>
     </div>
   </div>
 
@@ -50,7 +49,6 @@
       }
     </script>
 
-    <canvas class="output" width="600px" height="800px"></canvas>
 
     <form action="/update_situp" method="post">
       {% csrf_token %}
@@ -58,8 +56,10 @@
       <button class="save-btn"><h1>Done</h1></button>
     </form>
 
-    
-    <video class="input_video" width="0px" height="0px"></video>            
+            
+    <canvas class="output" width="600px" height="600px"></canvas>
+    <video class="input_video" width="0px" height="0px" style="visibility: hidden;"></video>            
+    <button class="change-btn" onclick="showPopup()"><h1>Change</h1></button>
     <div class="loading">
       <div class="spinner"></div>
     </div>

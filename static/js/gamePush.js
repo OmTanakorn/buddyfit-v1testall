@@ -1,7 +1,7 @@
 const config = {
     type: Phaser.CANVAS,
     width: 600,
-    height: 800,
+    height: 890,
     parent: 'game-container',
     scene: {
         preload: preload,
@@ -20,7 +20,7 @@ function preload() {
     // Load any assets needed for the character page
     this.load.image("background", "../static/images/BG.png");
     this.load.spritesheet('player', '../static/images/Minotor.png',
-                                { frameWidth : 640, frameHeight : 640, startFrame : 0, endFrame : 15});
+                                { frameWidth : 640, frameHeight : 640 });
 }
 
 function create() {

@@ -1,8 +1,8 @@
 const config = {
-        type: Phaser.AUTO,
+        type: Phaser.CANVAS,
 		scale: {
 			width: 600,
-			height: 800,
+			height: 890,
 		},
 		parent: 'game-container',
 		backgroundColor: '#fff',
@@ -15,9 +15,13 @@ const config = {
     
     function preload() {
 		// Load any assets needed for the character page
-		this.load.image("background", "static/images/BG.png");
-		this.load.spritesheet('player', 'static/images/Minotor.png',
-									{ frameWidth : 640, frameHeight : 640, startFrame : 0, endFrame : 15});
+		this.load.image("background", "static/images/BG.png")
+		this.load.spritesheet('duckEgg', 'static/images/DuckEgg.png',
+							 { frameWidth: 640, frameHeight: 640 })
+		this.load.spritesheet('duckDuck', 'static/images/DuckDuck.png',
+							 { frameWidth: 640, frameHeight: 640 })
+		this.load.spritesheet('duckImperfect', 'static/images/DuckImperfect.png',
+							 { frameWidth: 640, frameHeight: 640 })
 	}
 	
 	function create() {
@@ -25,29 +29,83 @@ const config = {
 		// Add background image
 		const BG = this.add.image(this.scale.width/2, this.scale.height/2, 'background')
 	
-		// Add character image
+		// Add egg character image
 		this.anims.create({
-			key : 'egg_idle',
-			frames : this.anims.generateFrameNumbers('player', { start : 0, end : 3}),
-			frameRate : 5, repeat : -1
+			key: 'eggIdle',
+			frames: this.anims.generateFrameNumbers('duckEgg', { start: 0, end: 3}),
+			frameRate: 5, repeat: -1
 		});
 
 		this.anims.create({
-			key : 'pushup',
-			frames : this.anims.generateFrameNumbers('player', { start : 4, end : 6}),
-			frameRate : 5
+			key: 'eggBreak',
+			frames: this.anims.generateFrameNumbers('duckEgg', { start: 4, end: 7 }),
+			frameRate: 5, repeat: -1
 		});
-		this.player = this.add.sprite(300, 400, 'player');
-		this.player.play('egg_idle');
+
+		// Add normal character image
+		this.anims.create({
+			key:'move',
+			frames: this.anims.generateFrameNumbers('duckDuck', { start: 0, end: 3, first: 0}),
+			frameRate: 5, repeat: -1
+		})
+
+		// Add imperfect character image
+		this.anims.create({
+			key: 'armImperfect',
+			frames: this.anims.generateFrameNumbers('duckImperfect', { start : 0, end : 3 }),
+			frameRate: 5, repeat: -1
+		});
 		
+		this.anims.create({
+			key: 'legImperfect',
+			frames: this.anims.generateFrameNumbers('duckImperfect', { start : 8, end : 11 }),
+			frameRate: 5, repeat: -1
+		})
+
+		this.anims.create({
+			key: 'bodyImperfect',
+			frames: this.anims.generateFrameNumbers('duckImperfect', { start : 4, end : 6 }),
+			frameRate: 5, repeat: -1
+		})
+
+		// Add character
+		this.player = this.add.sprite(this.scale.width/2, this.scale.height/2, 'duckEgg')
+		this.player.play('eggIdle').setScale(0.75)
+
 		// Add text
-		var text = this.add.text(300, 100, buddyName, {
+		var text = this.add.text(this.scale.width/2+20, this.scale.height/2-300, buddyName, {
 			fontSize: '42px',
 			fontFamily: 'minecraft',
 			fill: '#fff'
-		});
-		text.setOrigin(0.5, 0.5);
-		// console.log(buddyName)	
+		})
+		text.setOrigin(0.5)
+		// console.log(buddyName)
+
+		// Set interactive when values to change
+		if (armPower & legPower & bodyPower >= 0) {
+			this.player.play('eggIdle').setScale(0.75)
+		}
+		if (armPower & legPower & bodyPower > 10) {
+			this.player.play('eggBreak').setScale(0.75)
+		}
+		if (armPower & legPower & bodyPower > 20) {
+			this.player.play('move').setScale(0.50)
+		}
+		if (armPower & legPower & bodyPower > 30) {
+			this.player.anims.play('move').setScale(0.75)
+		}
+		if (armPower & legPower & bodyPower > 40) {
+			this.player.anims.play('move').setScale(1)
+		}
+		// if (armPower <= 40) {
+		// 	this.player.anims.play('armImperfect')
+		// }
+		// if (legPower <= 40) {
+		// 	this.player.anims.play('legImperfect')
+		// }
+		// if (bodyPower <= 40) {
+		// 	this.player.anims.play('bodyImperfect')
+		// }
 	}
 	
 	function update() {
