@@ -50,7 +50,19 @@ def create_buddy(request):
             return redirect('/')
     else:
         form = BuddyForm()
-    return render(request, 'pages\create.html', {'form': form})
+    return render(request, 'pages/create.html', {'form': form, 'buddy': None})
+
+# def create_buddy(request):
+#     if request.method == 'POST':
+#         form = BuddyForm(request.POST)
+#         if form.is_valid():
+#             buddy = form.save(commit=False)
+#             buddy.owner = request.user
+#             buddy.save()
+#             return redirect('/')
+#     else:
+#         form = BuddyForm()
+#     return render(request, 'pages\create.html', {'form': form})
 
 def update_pushup(request):
     if request.method == 'POST':

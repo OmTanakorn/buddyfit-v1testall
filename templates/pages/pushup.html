@@ -58,7 +58,7 @@
     <button class="change-btn" onclick="showPopup()"><h1>Change</h1></button>
 
     {% comment %} สำหรับบันทึกค่า {% endcomment %}
-    <form action="/update" method="post">
+    <form action="/update_pushup" method="post">
       {% csrf_token %}
       <input type="hidden"  name="pushup_count" id="CountPushup">
       <button class="save-btn"><h1>Done</h1></button>
