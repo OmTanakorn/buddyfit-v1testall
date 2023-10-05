@@ -14,7 +14,7 @@ def home(request):
     context = {
         'buddies': buddies
     }
-    return render(request, 'pages\home.html', context)
+    return render(request, 'pages/home.html', context)
 
 def pushup(request):
     # ดึงข้อมูล Buddy ของผู้ใช้งานปัจจุบัน
@@ -22,7 +22,7 @@ def pushup(request):
     context = {
         'buddies': buddies
     }
-    return render(request, 'pages\pushup.html', context)
+    return render(request, 'pages/pushup.html', context)
 
 def situp(request):
     # ดึงข้อมูล Buddy ของผู้ใช้งานปัจจุบัน
@@ -30,7 +30,7 @@ def situp(request):
     context = {
         'buddies': buddies
     }
-    return render(request, 'pages\situp.html', context)
+    return render(request, 'pages/situp.html', context)
 
 def squat(request):
     # ดึงข้อมูล Buddy ของผู้ใช้งานปัจจุบัน
@@ -38,7 +38,7 @@ def squat(request):
     context = {
         'buddies': buddies
     }
-    return render(request, 'pages\squat.html', context)
+    return render(request, 'pages/squat.html', context)
 
 def create_buddy(request):
     if request.method == 'POST':
@@ -93,3 +93,9 @@ def update_squat(request):
         buddy.legpower += count
         buddy.save()
     return redirect('/')
+
+def challenge(request):
+    return render(request, 'pages/challenge.html')
+
+def score_board(request):
+    return render(request, 'pages/scoreBoard.html')

@@ -13,4 +13,6 @@ urlpatterns = [
     path('update_pushup',views.update_pushup,name='update_pushup'),
     path('update_situp',views.update_situp,name='update_situp'),
     path('update_squat',views.update_squat,name='update_squat'),
+    path('challenge/', views.challenge, name='challenge'),
+    path('score_board', views.score_board, name='score_board'),
 ]
