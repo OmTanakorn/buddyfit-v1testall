@@ -95,11 +95,16 @@ body {
   display: flex;
   flex-direction: row;
 }
+.ranking{
+  display: flex;
+  flex-direction: row;
+}
 .rank-btn {
   background-color: #5c5be5;
   color: white;
-  padding: 10px 200px;
-  border-radius: 50px;
+  /* padding: 10px 200px; */
+  margin-bottom: 0.5rem;
+  border-radius: 16px;
   cursor: pointer;
 }
 .rank-btn:hover {
