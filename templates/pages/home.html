@@ -14,7 +14,7 @@
     <script src="{% static 'js/game.js'%}"></script>
   </div>
 
-  {% comment %} STUTS {% endcomment %}
+  <!-- {% comment %} STUTS {% endcomment %} -->
 
   <div id="popup" class="popup">
     <div class="popup-content">
@@ -34,22 +34,63 @@
 
     <div class="buddy-card">
       <h3>Name: {{ buddy.name }}</h3>
-      <h3></h3>
-    </br>
+      <h3>Challenge mode</h3>
+      <h4>&nbsp; &nbsp; Buddy high score: </h4>
+      <h4>&nbsp; &nbsp; Ranking: </h4>
     </div>
   
     <div class="status-container" >
+      <h3>Training mode</h3>
       <div class="status-piece">
-        <p><img src="../../static/images/Str.png" style="transform: rotate(45deg);"><span id="arm-power-{{ buddy.id }}"><h5>arm-power</h5></span></p>
-        <p><img src="../../static/images/End.png" ><span id="body-power-{{ buddy.id }}"></span><h5>body-power</h5></p>
-        <p><img src="../../static/images/Agi.png" style="transform: rotate(15deg);"><span id="leg-power-{{ buddy.id }}"></span><h5>leg-power</h5></p>
-        
+        <img src="../../static/images/Str.png" style="transform: rotate(45deg);">
+        <div class="status-container">
+          <h5>arm-power</h5>
+          <div class="status-piece">
+            <div class="experience-bar">
+              <div id="arm-power-{{ buddy.id }}" class="experience-fill"></div>
+              <div class="status-piece" style="justify-content: space-between;">
+                <div id="arm-power-level{{ buddy.id }}"></div>
+                <div id="arm-power-exp{{ buddy.id }}"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="status-piece">
+        <img src="../../static/images/End.png" style="margin-top: 20px;">
+        <div class="status-container">
+          <h5>body-power</h5>
+          <div class="status-piece">
+            <div class="experience-bar">
+              <div id="body-power-{{ buddy.id }}" class="experience-fill"></div>
+              <div class="status-piece" style="justify-content: space-between;">
+                <div id="body-power-level{{ buddy.id }}"></div>
+                <div id="body-power-exp{{ buddy.id }}"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="status-piece">
+        <img src="../../static/images/Agi.png" style="transform: rotate(15deg);">
+        <div class="status-container">
+          <h5>leg-power</h5>
+          <div class="status-piece">
+            <div class="experience-bar">
+              <div id="leg-power-{{ buddy.id }}" class="experience-fill"></div>
+              <div class="status-piece" style="justify-content: space-between;">
+                <div id="leg-power-level{{ buddy.id }}"></div>
+                <div id="leg-power-exp{{ buddy.id }}"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- <progress value="50" max="100"></progress> -->
-
     <script type="text/javascript">
-
       // Get the power values for the current buddy
       const buddyName = '{{ buddy.name }}'
       
@@ -60,27 +101,57 @@
       // Calculate the level and EXP percentages for each power
       const armLevel = Math.floor(armPower / 10);
       const armExp = Math.floor(((armPower / 10) - armLevel) * 100);
-      const legLevel = Math.floor(legPower / 10);
-      const legExp = Math.floor(((legPower / 10) - legLevel) * 100);
       const bodyLevel = Math.floor(bodyPower / 10);
       const bodyExp = Math.floor(((bodyPower / 10) - bodyLevel )* 100);
-  
+      const legLevel = Math.floor(legPower / 10);
+      const legExp = Math.floor(((legPower / 10) - legLevel) * 100);
+      
       // Display the power values as level and % EXP
+      
       const armPowerElem = document.getElementById("arm-power-{{ buddy.id }}");
-      armPowerElem.textContent = `Level ${armLevel} (${armExp}% EXP)`;
-      armPowerElem.style.width = `${armExp}%`;
-      armPowerElem.style.backgroundColor = armExp >= 50 ? "#4CAF50" : "#ddd";
-  
-      const legPowerElem = document.getElementById("leg-power-{{ buddy.id }}");
-      legPowerElem.textContent = `Level ${legLevel} (${legExp}% EXP)`;
-      legPowerElem.style.width = `${legExp}%`;
-      legPowerElem.style.backgroundColor = legExp >= 50 ? "#4CAF50" : "#ddd";
-  
+      // armPowerElem.textContent = `EXP ${armExp}%`;
+      const armWidthPercentage = Math.min(Math.max(armExp, 0), 100);
+      armPowerElem.style.width = `${armWidthPercentage}%`;
+      if (armWidthPercentage > 0) {
+        armPowerElem.style.backgroundColor = `rgb(${255 - armWidthPercentage * 2.55}, ${armWidthPercentage * 2.55}, 0)`;
+      } else {
+        armPowerElem.style.backgroundColor = "#ddd";
+      }
+      
       const bodyPowerElem = document.getElementById("body-power-{{ buddy.id }}");
-      bodyPowerElem.textContent = `Level ${bodyLevel} (${bodyExp}% EXP)`;
-      bodyPowerElem.style.width = `${bodyExp}%`;
-      bodyPowerElem.style.backgroundColor = bodyExp >= 50 ? "#4CAF50" : "#ddd";
+      // bodyPowerElem.textContent = `EXP ${bodyExp}%`;
+      const bodyWidthPercentage = Math.min(Math.max(bodyExp, 0), 100);
+      bodyPowerElem.style.width = `${bodyWidthPercentage}%`;
+      if (bodyWidthPercentage > 0) {
+          bodyPowerElem.style.backgroundColor = `rgb(${255 - bodyWidthPercentage * 2.55}, ${bodyWidthPercentage * 2.55}, 0)`;
+      } else {
+          bodyPowerElem.style.backgroundColor = "#ddd";
+      }
 
+      const legPowerElem = document.getElementById("leg-power-{{ buddy.id }}");
+      // legPowerElem.textContent = `EXP ${legExp}%`;
+      const legWidthPercentage = Math.min(Math.max(legExp, 0), 100);
+      legPowerElem.style.width = `${legWidthPercentage}%`;
+      if (legWidthPercentage > 0) {
+          legPowerElem.style.backgroundColor = `rgb(${255 - legWidthPercentage * 2.55}, ${legWidthPercentage * 2.55}, 0)`;
+      } else {
+          legPowerElem.style.backgroundColor = "#ddd";
+      }
+
+      const armPowerElemExp = document.getElementById("arm-power-exp{{ buddy.id }}");
+      armPowerElemExp.textContent = `${armExp}%`;
+      const armPowerElemLevel = document.getElementById("arm-power-level{{ buddy.id }}");
+      armPowerElemLevel.textContent = `LEVEL ${armLevel}`;
+
+      const bodyPowerElemExp = document.getElementById("body-power-exp{{ buddy.id }}");
+      bodyPowerElemExp.textContent = `${bodyExp}%`;
+      const bodyPowerElemLevel = document.getElementById("body-power-level{{ buddy.id }}");
+      bodyPowerElemLevel.textContent = `LEVEL ${bodyLevel}`;
+
+      const legPowerElemExp = document.getElementById("leg-power-exp{{ buddy.id }}");
+      legPowerElemExp.textContent = `${legExp}%`;
+      const legPowerElemLevel = document.getElementById("leg-power-level{{ buddy.id }}");
+      legPowerElemLevel.textContent = `LEVEL ${legLevel}`;
 
       function showPopup() {
         // Show the popup
@@ -102,6 +173,10 @@
       }
     </script>
 
+    <br />
+    <button class="challenge-btn" onclick="showPopup()"><h1>Challenge</h1></button>
+    <br />
+    <br />
     <button class="train-btn" onclick="showPopup()"><h1>Train</h1></button>
   
     {% endfor %}

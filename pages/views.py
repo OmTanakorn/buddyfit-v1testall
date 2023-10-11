@@ -20,7 +20,7 @@ def home(request):
     context = {
         'buddies': buddies
     }
-    return render(request, 'pages\home.html', context)
+    return render(request, 'pages/home.html', context)
 
 def pushup(request):
     # ดึงข้อมูล Buddy ของผู้ใช้งานปัจจุบัน
@@ -28,7 +28,7 @@ def pushup(request):
     context = {
         'buddies': buddies
     }
-    return render(request, 'pages\pushup.html', context)
+    return render(request, 'pages/pushup.html', context)
 
 def situp(request):
     # ดึงข้อมูล Buddy ของผู้ใช้งานปัจจุบัน
@@ -36,7 +36,7 @@ def situp(request):
     context = {
         'buddies': buddies
     }
-    return render(request, 'pages\situp.html', context)
+    return render(request, 'pages/situp.html', context)
 
 def squat(request):
     # ดึงข้อมูล Buddy ของผู้ใช้งานปัจจุบัน
@@ -44,7 +44,16 @@ def squat(request):
     context = {
         'buddies': buddies
     }
-    return render(request, 'pages\squat.html', context)
+    return render(request, 'pages/squat.html', context)
+
+#challenge
+def challenge(request):
+    # ดึงข้อมูล Buddy ของผู้ใช้งานปัจจุบัน
+    buddies = Buddy.objects.filter(owner=request.user)
+    context = {
+        'buddies': buddies
+    }
+    return render(request, 'pages\challenge.html', context)
 
 #challenge
 def challenge(request):
@@ -107,3 +116,20 @@ def update_score(request):
             buddy.highScore = score
             buddy.save()
     return redirect('/')
+
+def update_score(request):
+    if request.method == 'POST':
+        score = int(request.POST["score"]);
+        owner = request.user
+        buddy = get_object_or_404(Buddy, owner=owner)
+        print("Get post with highScore = ", score)
+        if(buddy.highScore <= score):
+            buddy.highScore = score
+            buddy.save()
+    return redirect('/')
+
+def challenge(request):
+    return render(request, 'pages/challenge.html')
+
+def score_board(request):
+    return render(request, 'pages/scoreBoard.html')

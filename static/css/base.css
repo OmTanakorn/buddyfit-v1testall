@@ -38,6 +38,7 @@ body {
   justify-content: space-between;
 }
 
+
 .login-image {
   margin-right: 50px;
 }
@@ -64,7 +65,7 @@ body {
 
 .buddies-container {
   margin-left: 20px;
-  margin-top: 50px; /* ลดค่า margin-top ลงเล็กน้อย */
+  margin-top: -15px;
 }
 
 .Mediapipe-container {
@@ -74,11 +75,30 @@ body {
   margin-top: auto;
 }
 
-.exp-bar {
-  display: inline-block;
-  height: 10px;
+.experience-bar {
+  width: 300px; /* Adjust the width as needed */
+  height: 20px;
   background-color: #ddd;
-  border-radius: 5px;
+  border-radius: 10px;
+  margin: 20px auto; /* Center the bar horizontally */
+  position: relative;
+}
+
+.experience-fill {
+  height: 100%;
+  width: 0; /* Initial width is 0, will be updated dynamically */
+  background-color: #4caf50; /* Initial color */
+  border-radius: 10px;
+  text-align: center;
+  line-height: 20px;
+  color: #fff;
+  position: relative;
+  transition: width 0.5s, background-color 0.5s;
+}
+
+.status-piece {
+  display: flex;
+  flex-direction: row;
 }
 
 /* Popup css */
@@ -147,6 +167,18 @@ body {
   background-color: #3e8e41;
 }
 
+.challenge-btn {
+  background-color: #D6874D;
+  color: white;
+  padding: 10px 150px;
+  border-radius: 50px;
+  cursor: pointer;
+}
+
+.challenge-btn:hover {
+  background-color: #B05E22;
+}
+
 .BuddyFit {
   text-align: center;
 }
@@ -154,12 +186,8 @@ body {
 .status-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
-}
-
-.status-piece {
-  display: flex;
-  flex-direction: column;
+  align-items: left;
+  margin-top: 25px;
 }
 
 /* change button */
@@ -189,3 +217,4 @@ body {
 .save-btn:hover {
   background-color: #3e8e41;
 }
+
