@@ -82,22 +82,26 @@ const config = {
 		// console.log(buddyName)
 
 		// Set interactive when values to change
-		if (armPower & legPower & bodyPower >= 0) {
-			this.player.play('eggIdle').setScale(0.75)
+		console.log(armLevel);
+		const totalLevel = (armLevel + legLevel + bodyLevel) / 3;
+
+		if (totalLevel >= 40) {
+    		this.player.anims.play('move').setScale(1);
+    		console.log("move 40");
+		} else if (totalLevel >= 30) {
+			this.player.anims.play('move').setScale(0.75);
+			console.log("move 30");
+		} else if (totalLevel >= 20) {
+			this.player.play('move').setScale(0.50);
+			console.log("move 20");
+		} else if (totalLevel >= 10) {
+			this.player.play('eggBreak').setScale(0.75);
+			console.log("eggBreak");
+		} else if (totalLevel >= 0) {
+			this.player.play('eggIdle').setScale(0.75);
+			console.log("eggIdle");
 		}
-		if (armPower & legPower & bodyPower > 10) {
-			this.player.play('eggBreak').setScale(0.75)
-		}
-		if (armPower & legPower & bodyPower > 20) {
-			this.player.play('move').setScale(0.50)
-		}
-		if (armPower & legPower & bodyPower > 30) {
-			this.player.anims.play('move').setScale(0.75)
-		}
-		if (armPower & legPower & bodyPower > 40) {
-			this.player.anims.play('move').setScale(1)
-		}
-		// if (armPower <= 40) {
+			// if (armPower <= 40) {
 		// 	this.player.anims.play('armImperfect')
 		// }
 		// if (legPower <= 40) {

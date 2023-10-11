@@ -58,7 +58,7 @@ class gameStart extends Phaser.Scene {
         // Handle start button click event
         startButton.on('pointerdown', () => {
 
-            this.scene.start("gamec"); // Start the "gamec" scene when the button is clicked
+            this.scene.start("gamecboss"); // Start the "gamec" scene when the button is clicked
         });
     }
 

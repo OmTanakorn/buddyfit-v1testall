@@ -62,6 +62,9 @@ body {
   flex-direction: column;
   margin-left: 10px;
 }
+.Leader_container {
+  margin-right: 250px; /* ปรับระยะห่างทางขวาตามความต้องการ */
+}
 
 .buddies-container {
   margin-left: 20px;

@@ -1,0 +1,76 @@
+{% extends '_base.html' %}
+{% load static %}
+
+{% block content %}
+
+<h1>Exercise History</h1>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+
+<canvas id="pushupChart" width="400" height="200"></canvas>
+<script>
+    var pushupData = {{ pushup_data|safe }};
+    var situpData = {{ situp_data|safe }};
+    var squatData = {{ squat_data|safe }};
+
+    pushupData.forEach(function (entry) {
+        entry.date = new Date(entry.date);
+    });
+
+    situpData.forEach(function (entry) {
+        entry.date = new Date(entry.date);
+    });
+
+    squatData.forEach(function (entry) {
+        entry.date = new Date(entry.date);
+    });
+
+    var ctx = document.getElementById('pushupChart').getContext('2d');
+    var myLineChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: pushupData.map(function (entry) { return entry.date.toLocaleDateString(); }),
+            datasets: [
+                {
+                    label: 'Pushup Count',
+                    data: pushupData.map(function (entry) { return entry.count; }),
+                    fill: false,
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1
+                },
+                {
+                    label: 'Situp Count',
+                    data: situpData.map(function (entry) { return entry.count; }),
+                    fill: false,
+                    borderColor: 'rgb(255, 99, 132)',
+                    tension: 0.1
+                },
+                {
+                    label: 'Squat Count',
+                    data: squatData.map(function (entry) { return entry.count; }),
+                    fill: false,
+                    borderColor: 'rgb(54, 162, 235)',
+                    tension: 0.1
+                }
+            ]
+        },
+        options: {
+            scales: {
+                x: [{
+                    display: true,
+                    title: {
+                        display: true,
+                        text: 'Date'
+                    }
+                }],
+                y: [{
+                    display: true,
+                    title: {
+                        display: true,
+                        text: 'Exercise Count'
+                    }
+                }]
+            }
+        }
+    });
+</script>
+{% endblock %}

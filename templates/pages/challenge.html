@@ -12,6 +12,7 @@
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.54.0/dist/phaser.min.js"></script>
     <div id="game-container" ></div>
     <script src="{% static 'js/gameChallenge.js'%}"></script>
+    <script src="{% static 'js/gameChallengeBoss.js'%}"></script>
     <script src="{% static 'js/gameChallengeStart.js'%}"></script>
     <script src="{% static 'js/gameChallengeEnd.js'%}"></script>
     <script>
@@ -25,7 +26,7 @@
           arcade: {
             debug: true,
           },
-        scene: [gameStart , gamec ,gameEnd] // นำ Scene ที่สร้างขึ้นเข้ามาในเกม
+        scene: [gameStart, gamecboss  , gamec ,gameEnd] // นำ Scene ที่สร้างขึ้นเข้ามาในเกม
     };
     
     //สร้างเกม
@@ -81,8 +82,8 @@
     <script src="../static/js/Challenge.js"> </script>
 
     <script>
-      document.getElementById("endScore").value = 100;
-      {% comment %} document.getElementById("endScore").value = sessionStorage.getItem("score"); {% endcomment %}
+      document.getElementById("endScore").value = 0;
+      document.getElementById("endScore").value = sessionStorage.getItem("score");
       console.log(endScore)
     </script>
     

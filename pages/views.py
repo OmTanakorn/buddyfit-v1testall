@@ -1,11 +1,15 @@
+from datetime import date
 from django.contrib.auth import login, authenticate
-from django.contrib.auth.forms import UserCreationForm
+import json
+from django.db.models import Window
+from django.db.models.functions import DenseRank
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from accounts.models import Buddy
-
+from accounts.models import Buddy,ExHistory
+from django.db.models.functions import DenseRank
 from accounts.forms import BuddyForm
+from django.core.serializers.json import DjangoJSONEncoder
 
 
 @login_required
@@ -21,6 +25,42 @@ def home(request):
         'buddies': buddies
     }
     return render(request, 'pages/home.html', context)
+
+def leaderboard(request):
+    # ดึงข้อมูล Buddy และเรียงลำดับตามคะแนน highScore
+    buddies = Buddy.objects.all().order_by('-highScore')
+    
+    context = {
+        'buddies': buddies
+    }
+    # ส่งข้อมูลไปยัง HTML template
+    return render(request, 'pages/leaderboard.html', context)
+
+def ex_history(request):
+    user = request.user
+    ex_history = ExHistory.objects.filter(owner=user).order_by('-exData')
+    
+    pushup_data = [{'date': entry.exData, 'count': entry.exCount} for entry in ex_history if entry.exType == 'pushup']
+    situp_data = [{'date': entry.exData, 'count': entry.exCount} for entry in ex_history if entry.exType == 'situp']
+    squat_data = [{'date': entry.exData, 'count': entry.exCount} for entry in ex_history if entry.exType == 'squat']
+
+    
+    pushup_data_json = json.dumps(pushup_data, cls=DjangoJSONEncoder)
+    situp_data_json = json.dumps(situp_data, cls=DjangoJSONEncoder)
+    squat_data_json = json.dumps(squat_data, cls=DjangoJSONEncoder)
+    
+    print(pushup_data_json)
+    print(situp_data_json)
+    print(squat_data_json)
+    
+    
+    context = {
+        'pushup_data': pushup_data_json,
+        'situp_data' : situp_data_json,
+        'squat_data' : squat_data_json,
+    }
+    
+    return render(request, 'pages/ex_history.html', context)
 
 def pushup(request):
     # ดึงข้อมูล Buddy ของผู้ใช้งานปัจจุบัน
@@ -76,6 +116,16 @@ def update_pushup(request):
         buddy = get_object_or_404(Buddy, owner=owner)
         buddy.armpower += count
         buddy.save()
+        
+        # บันทึกค่า count ลงใน ExHistory
+        if count > 0:
+            ex_history = ExHistory.objects.create(
+                exType="pushup",
+                exCount=count,
+                exData=date.today(),  # สามารถใช้เวลาปัจจุบันหรือวิธีอื่นในการกำหนดเวลาได้
+                owner=owner
+        )
+
     return redirect('/')
 
 def update_situp(request):
@@ -86,6 +136,14 @@ def update_situp(request):
         buddy = get_object_or_404(Buddy, owner=owner)
         buddy.bodypower += count
         buddy.save()
+        # บันทึกค่า count ลงใน ExHistory
+        if count > 0:
+            ex_history = ExHistory.objects.create(
+                exType="situp",
+                exCount=count,
+                exData=date.today(),  # สามารถใช้เวลาปัจจุบันหรือวิธีอื่นในการกำหนดเวลาได้
+                owner=owner
+            )
     return redirect('/')
 
 def update_squat(request):
@@ -96,6 +154,14 @@ def update_squat(request):
         buddy = get_object_or_404(Buddy, owner=owner)
         buddy.legpower += count
         buddy.save()
+        # บันทึกค่า count ลงใน ExHistory
+        if count > 0:
+            ex_history = ExHistory.objects.create(
+                exType="squat",
+                exCount=count,
+                exData=date.today(),  # สามารถใช้เวลาปัจจุบันหรือวิธีอื่นในการกำหนดเวลาได้
+                owner=owner
+            )
     return redirect('/')
 
 def update_score(request):
@@ -109,17 +175,4 @@ def update_score(request):
             buddy.save()
     return redirect('/')
 
-def update_score(request):
-    if request.method == 'POST':
-        score = int(request.POST["score"]);
-        owner = request.user
-        buddy = get_object_or_404(Buddy, owner=owner)
-        print("Get post with highScore = ", score)
-        if(buddy.highScore <= score):
-            buddy.highScore = score
-            buddy.save()
-    return redirect('/')
 
-
-def score_board(request):
-    return render(request, 'pages/scoreBoard.html')

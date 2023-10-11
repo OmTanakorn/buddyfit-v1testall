@@ -12,8 +12,13 @@ spinner.ontransitionend = () => {
 
 // let push count stuff
 let nose_y = 0.5
+let right_index_x = 0.5
 let stage = 0
 let count = 0
+
+let atk = 0
+let astats = 0
+let cLatk = 0
 
 function zColor(data) {
     const z = clamp(data.from.z + 0.5, 0, 1)
@@ -76,6 +81,34 @@ function onResultsPose(results) {
             .map(index => results.poseLandmarks[index]),
         {color: zColor, fillColor: '#AAAAAA'})
         // console.log(Object.values(POSE_LANDMARKS_NEUTRAL))
+    const landmarksLeft = Object.values(POSE_LANDMARKS_RIGHT)
+        .map(index => results.poseLandmarks[index])
+    const landmarksRight = Object.values(POSE_LANDMARKS_LEFT)
+        .map(index => results.poseLandmarks[index])
+        
+    rightarm = landmarksLeft[9].x
+    leftarm = landmarksRight[9].x
+
+    if (rightarm < 0.2 && atk != 1 ) {
+        atk = 1
+        console.log("Yap")
+    }
+    
+    if (rightarm > 0.5) {
+        
+    }
+    
+    if (leftarm < 0.2 && atk == 1) {
+        astats = 1
+        atk = 0
+        console.log("Pow")
+    }
+    
+    if (leftarm > 0.5) {
+
+    }
+
+    
 
     const nose = Object.values(POSE_LANDMARKS_NEUTRAL)
         .map(index => results.poseLandmarks[index])
@@ -90,10 +123,10 @@ function onResultsPose(results) {
     if(nose_y <=0.4 ){
         stage = -1
     }
-    console.log(stage)
-    drawLineOnCanvas(canvasCtx, 100, 100, 200, 200, 'blue'); // เส้นสีน้ำเงิน
-    drawLineOnCanvas(canvasCtx, 200, 200, 300, 100, 'red'); // เส้นสีแดง
+    // console.log(stage)
+    drawLineOnCanvas(canvasCtx, 50, 100, 50, 300, 'blue'); // สร้างเส้นด้านซ้าย (จาก (10, 10) ไป (10, 90))
 
+    
     canvasCtx.font = "30px Arial"
     canvasCtx.fillStyle = "red"
     canvasCtx.restore()

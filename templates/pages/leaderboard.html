@@ -1,0 +1,40 @@
+{% extends '_base.html' %}
+
+{% load static %}
+
+{% block title %}Leaderboard{% endblock title %}
+{% block content %}
+<div class="HQ_container">
+    <div class="game-container">
+        <script src="https://cdn.jsdelivr.net/npm/phaser@3.54.0/dist/phaser.min.js"></script>
+        <div id="game-container"></div>
+        <script src="{%static 'js/Leader.js'%}"></script>
+    </div>
+
+    <div class="Leader_container">
+        <h1>Leader Borard</h1>
+        <table>
+            <thead> 
+                <tr>
+                    <th>&nbsp;&nbsp;&nbsp;Rank</th>
+                    <th>&nbsp;&nbsp;&nbsp; Name</th>
+                    <th>&nbsp;&nbsp;&nbsp; High Score</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for buddy in buddies %}
+                {% if forloop.counter <= 20 %}
+                    <tr>
+                        <td>&nbsp;&nbsp;&nbsp;{{ forloop.counter }}</td>
+                        <td>&nbsp;&nbsp;&nbsp; {{ buddy.name }}</td>
+                        <td>&nbsp;&nbsp;&nbsp; {{ buddy.highScore }}</td>
+                    </tr>
+                {% endif %}
+                
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+    
+{% endblock content %}  

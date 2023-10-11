@@ -35,7 +35,7 @@
     <div class="buddy-card">
       <h3>Name: {{ buddy.name }}</h3>
       <h3>Challenge mode</h3>
-      <h4>&nbsp; &nbsp; Buddy high score: </h4>
+      <h4>&nbsp; &nbsp; Buddy high score: {{buddy.highScore}} </h4>
       <h4>&nbsp; &nbsp; Ranking: </h4>
     </div>
   
@@ -93,7 +93,7 @@
     <script type="text/javascript">
       // Get the power values for the current buddy
       const buddyName = '{{ buddy.name }}'
-      
+      var highScore = '{{buddy.highScore}}'
       var armPower = '{{ buddy.armpower }}';
       var legPower = '{{ buddy.legpower }}';
       var bodyPower = '{{ buddy.bodypower }}';
@@ -153,6 +153,11 @@
       const legPowerElemLevel = document.getElementById("leg-power-level{{ buddy.id }}");
       legPowerElemLevel.textContent = `LEVEL ${legLevel}`;
 
+      function redirectToChallenge() {
+        // ใช้ window.location.href เพื่อเปลี่ยนพาท
+        window.location.href = '/challenge/'; // หรือหากต้องการพาทอื่น ๆ คุณสามารถแก้ไขตามความเหมาะสม
+      }    
+
       function showPopup() {
         // Show the popup
         document.getElementById("popup").style.display = "block";
@@ -174,7 +179,7 @@
     </script>
 
     <br />
-    <button class="challenge-btn" onclick="showPopup()"><h1>Challenge</h1></button>
+    <button class="challenge-btn" onclick="redirectToChallenge()"><h1>Challenge</h1></button>
     <br />
     <br />
     <button class="train-btn" onclick="showPopup()"><h1>Train</h1></button>

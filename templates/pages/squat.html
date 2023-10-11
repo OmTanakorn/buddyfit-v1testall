@@ -67,21 +67,21 @@
 
     <div id="countdown"></div>
     
+    <script >
 
-<script>
-  document.getElementById("CountPushup").value = 0;
-  // สร้างฟังก์ชัน updateCountdown ในไฟล์ pushup.html เพื่อแสดงค่า countdown ในตัวแปร pushupCountdown
-  function updateCountdown() {
-    const countdownDiv = document.getElementById('countdown');
-    const countdown = window.getSquatCountdown();
-    if (countdown === 10) {
-      countdownDiv.innerText = 'PASS';
-      document.getElementById("CountSquat").value = sessionStorage.getItem("squat_count");
-      setInterval(updateCountdown, 0);
-    }
-  }
-  setInterval(updateCountdown, 500);
-</script>
+      document.getElementById("CountSquat").value = 0;
+      // สร้างฟังก์ชัน updateCountdown ในไฟล์ pushup.html เพื่อแสดงค่า countdown ในตัวแปร pushupCountdown
+      function updateCountdown() {
+        //const countdownDiv = document.getElementById('countdown');
+        const countdown = window.getSquatCountdown();
+        if (countdown === 10) {
+          //countdownDiv.innerText = 'PASS';
+          document.getElementById("CountSquat").value = sessionStorage.getItem("squat_count");
+          setInterval(updateCountdown, 0);
+        }
+      }
+      setInterval(updateCountdown, 500);
+    </script>
 
   </div>
 {% endblock content %}
