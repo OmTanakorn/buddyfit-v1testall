@@ -10,30 +10,30 @@
         <div id="game-container"></div>
         <script src="{%static 'js/Leader.js'%}"></script>
     </div>
-
+    
     <div class="Leader_container">
-        <h1>Leader Borard</h1>
-        <table>
-            <thead> 
-                <tr>
-                    <th>&nbsp;&nbsp;&nbsp;Rank</th>
-                    <th>&nbsp;&nbsp;&nbsp; Name</th>
-                    <th>&nbsp;&nbsp;&nbsp; High Score</th>
-                </tr>
-            </thead>
-            <tbody>
+        <div class="leader_name">ranking</div>
+        <div class="leader_board">
+            <div class="ribbon"></div>
+            <table>
                 {% for buddy in buddies %}
-                {% if forloop.counter <= 20 %}
-                    <tr>
-                        <td>&nbsp;&nbsp;&nbsp;{{ forloop.counter }}</td>
-                        <td>&nbsp;&nbsp;&nbsp; {{ buddy.name }}</td>
-                        <td>&nbsp;&nbsp;&nbsp; {{ buddy.highScore }}</td>
-                    </tr>
-                {% endif %}
-                
+                    {% if forloop.counter <= 10 %}
+                        <tr>
+                            <td class="number">{{ forloop.counter }}</td>
+                            <td class="name"> {{ buddy.name }}</td>
+                            {% if forloop.counter == 1 %}
+                                <td class="scores">
+                                    {{ buddy.highScore }}
+                                    <img class="gold-medal" src="https://github.com/malunaridev/Challenges-iCodeThis/blob/master/4-leaderboard/assets/gold-medal.png?raw=true" alt="gold medal" />
+                                </td>
+                            {% else %}
+                                <td class="scores">{{ buddy.highScore }}</td>
+                            {% endif %}
+                        </tr>
+                    {% endif %}
                 {% endfor %}
-            </tbody>
-        </table>
+            </table>
+        </div>
     </div>
 </div>
     

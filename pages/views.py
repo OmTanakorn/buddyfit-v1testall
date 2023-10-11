@@ -93,7 +93,7 @@ def challenge(request):
     context = {
         'buddies': buddies
     }
-    return render(request, 'pages\challenge.html', context)
+    return render(request, 'pages/challenge.html', context)
 
 
 def create_buddy(request):

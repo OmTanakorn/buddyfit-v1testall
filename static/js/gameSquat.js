@@ -43,8 +43,8 @@ function startTimer(duration, timerText) {
 function preload() {
     // Load ant assets needed for the character page
     this.load.image('background', '../static/images/BG.png')
-    this.load.spritesheet('player', '../static/images/Minotor.png',
-                         {frameWidth: 640, frameHeight: 640})
+    this.load.spritesheet('duckDuck', 'static/images/DuckDuck.png',
+							 { frameWidth: 640, frameHeight: 640 })
 }
 
 function create() {

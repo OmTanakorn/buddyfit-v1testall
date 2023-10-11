@@ -16,14 +16,22 @@ const config = {
     function preload() {
 		// Load any assets needed for the character page
 		this.load.image("background", "../static/images/BG.png")
+		this.load.spritesheet('minotor', '../static/images/Minotor.png',
+                    		 {frameWidth: 640, frameHeight: 640})
 	}
 	
 	function create() {
 		// Create the character page
 		// Add background image
 		const BG = this.add.image(this.scale.width/2, this.scale.height/2, 'background')
-	
-		
+		this.player = this.add.sprite(300, 400, 'player')
+
+		this.anims.create({
+			key:'move',
+			frames: this.anims.generateFrameNumbers('minotor', { start: 0, end: 3, first: 0}),
+			frameRate: 5, repeat: -1
+		})
+		this.player.play('move')
 	}
 	
 	function update() {
