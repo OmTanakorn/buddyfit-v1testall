@@ -35,9 +35,10 @@
     <div class="buddy-card">
       <h3>Name: {{ buddy.name }}</h3>
       <h3>Challenge mode</h3>
-      <h4>&nbsp; &nbsp; Buddy high score: {{buddy.highScore}} </h4>
-      <button class="rank-btn" onclick="leaderboard()">Ranking</button>
-      <!-- <h4>&nbsp; &nbsp; Ranking: </h4> -->
+      <div class="ranking">
+        <button class="rank-btn" onclick="leaderboard()">Ranking</button>
+        <h4>&nbsp;Buddy high score: {{buddy.highScore}} </h4>
+      </div>
     </div>
   
     <div class="status-container" >
