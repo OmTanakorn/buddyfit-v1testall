@@ -55,14 +55,6 @@ def challenge(request):
     }
     return render(request, 'pages\challenge.html', context)
 
-#challenge
-def challenge(request):
-    # ดึงข้อมูล Buddy ของผู้ใช้งานปัจจุบัน
-    buddies = Buddy.objects.filter(owner=request.user)
-    context = {
-        'buddies': buddies
-    }
-    return render(request, 'pages\challenge.html', context)
 
 def create_buddy(request):
     if request.method == 'POST':
@@ -128,8 +120,6 @@ def update_score(request):
             buddy.save()
     return redirect('/')
 
-def challenge(request):
-    return render(request, 'pages/challenge.html')
 
 def score_board(request):
     return render(request, 'pages/scoreBoard.html')
