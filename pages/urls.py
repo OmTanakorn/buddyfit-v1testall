@@ -19,5 +19,4 @@ urlpatterns = [
     path('update_score',views.update_score,name='update_score'),
     
     path('ex_history/', views.ex_history, name='ex_history'),
-
 ]

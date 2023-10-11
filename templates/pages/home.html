@@ -36,7 +36,8 @@
       <h3>Name: {{ buddy.name }}</h3>
       <h3>Challenge mode</h3>
       <h4>&nbsp; &nbsp; Buddy high score: {{buddy.highScore}} </h4>
-      <h4>&nbsp; &nbsp; Ranking: </h4>
+      <button class="rank-btn" onclick="leaderboard()">Ranking</button>
+      <!-- <h4>&nbsp; &nbsp; Ranking: </h4> -->
     </div>
   
     <div class="status-container" >
@@ -152,6 +153,10 @@
       legPowerElemExp.textContent = `${legExp}%`;
       const legPowerElemLevel = document.getElementById("leg-power-level{{ buddy.id }}");
       legPowerElemLevel.textContent = `LEVEL ${legLevel}`;
+
+      function leaderboard() {
+        window.location.href = '/leaderboard/';
+      }    
 
       function redirectToChallenge() {
         // ใช้ window.location.href เพื่อเปลี่ยนพาท
