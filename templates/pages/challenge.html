@@ -1,0 +1,91 @@
+{% extends '_base.html' %}
+{% load static %}
+
+
+{% block title %}Challenge{% endblock title %}
+
+{% block content %}
+
+<div class="HQ_container">
+  
+  <div class="game-container" >
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.54.0/dist/phaser.min.js"></script>
+    <div id="game-container" ></div>
+    <script src="{% static 'js/gameChallenge.js'%}"></script>
+    <script src="{% static 'js/gameChallengeStart.js'%}"></script>
+    <script src="{% static 'js/gameChallengeEnd.js'%}"></script>
+    <script>
+      const config = {
+        type: Phaser.CANVAS,
+        width: 800, // ปรับความกว้างตามความเหมาะสม
+        height: 600, // ปรับความสูงตามความเหมาะสม
+        parent: 'game-container',
+        physics : {
+          default : "arcade",},
+          arcade: {
+            debug: true,
+          },
+        scene: [gameStart , gamec ,gameEnd] // นำ Scene ที่สร้างขึ้นเข้ามาในเกม
+    };
+    
+    //สร้างเกม
+    const game = new Phaser.Game(config);
+    </script>
+  </div>
+
+  <div class= "Mediapipe-container">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.1/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils@0.1/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.2/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.2/pose.js" crossorigin="anonymous"></script>
+
+    <canvas class="output" width="400px" height="400px"></canvas>
+    <button class="change-btn" id="doneButton"><h1>Replay</h1></button>
+
+    <script>
+      $(document).ready(function () {
+        $('#doneButton').click(function () {
+            var score = $('#endScore').val();
+            var csrftoken = $("[name=csrfmiddlewaretoken]").val(); // รับค่า CSRF Token จากแบบฟอร์ม
+
+            $.ajax({
+                type: "POST",
+                url: "/update_score",
+                data: { score: score },
+                headers: { "X-CSRFToken": csrftoken }, // ใส่ CSRF Token ใน header
+                success: function (response) {
+                    // คุณสามารถทำอะไรก็ได้เมื่อคะแนนอัปเดตเสร็จ (ไม่จำเป็นต้องรีเฟรชหน้าเว็บ)
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        });
+    });
+    </script>
+    
+    {% comment %} สำหรับบันทึกค่า {% endcomment %}
+    <form action="/update_score" method="post">
+      {% csrf_token %}
+      <input type="hidden"  name="score" id="endScore">
+      <button class="save-btn"><h1>Done</h1></button>
+    </form>
+    
+    <video class="input_video" width="0px" height="0px" style="visibility: hidden"></video>            
+    
+    <div class="loading">
+      <div class="spinner"></div>
+    </div>
+    <div style="visibility: hidden" class="control"></div>
+    <script src="../static/js/Challenge.js"> </script>
+
+    <script>
+      document.getElementById("endScore").value = 100;
+      {% comment %} document.getElementById("endScore").value = sessionStorage.getItem("score"); {% endcomment %}
+      console.log(endScore)
+    </script>
+    
+
+  </div>
+{% endblock content %}

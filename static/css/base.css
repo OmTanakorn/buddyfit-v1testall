@@ -11,6 +11,11 @@ html {
   }
 }
 
+.d-flex {
+  margin-right: -50px; /* ปรับระยะห่างข้างขวา */
+  margin-left: -20px; /* ปรับระยะห่างข้างซ้าย */
+}
+
 body {
   font-family: 'minecraft', sans-serif; /* กำหนด font-family เป็น Minecraft */
 }
@@ -41,18 +46,20 @@ body {
   width: 50%;
 }
 
-/* Home Page */
+/* Home    */
 .HQ_container {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  align-items: flex-start; /* ปรับให้ buddies-container ติดขอบด้านขวา */
+  align-items: flex-start;
+  margin-left: -50px; /* ขยายขอบซ้าย */
+  margin-right: -50px; /* ขยายขอบขวา */
 }
 
 .game-container {
   display: flex;
   flex-direction: column;
-  margin-left: 50px;
+  margin-left: 10px;
 }
 
 .buddies-container {

@@ -12,13 +12,22 @@ spinner.ontransitionend = () => {
 
 // let push count stuff
 let nose_y = 0.5
-let stage = "UP"
-let counter = 0
+let stage = 0
 let count = 0
 
 function zColor(data) {
     const z = clamp(data.from.z + 0.5, 0, 1)
     return `rgba(0, ${255 * z}, ${255 * (1 - z)}, 1)`
+}
+
+function drawLineOnCanvas(canvasCtx, startX, startY, endX, endY, color) {
+    canvasCtx.beginPath();
+    canvasCtx.moveTo(startX, startY);
+    canvasCtx.lineTo(endX, endY);
+    canvasCtx.strokeStyle = color; // สีของเส้น
+    canvasCtx.lineWidth = 2; // ความหนาของเส้น
+    canvasCtx.stroke();
+    canvasCtx.closePath();
 }
 
 function onResultsPose(results) {
@@ -71,24 +80,23 @@ function onResultsPose(results) {
     const nose = Object.values(POSE_LANDMARKS_NEUTRAL)
         .map(index => results.poseLandmarks[index])
     nose_y = nose[0].y
-    // console.log(nose_y)
-
-    if(nose_y <= 0.5) {
-        stage = "UP"
-        count = 0
+    
+    if(nose_y >= 0.8) {
+        stage = 1
     }
-    if(nose_y > 0.7 && stage == "UP") {
-        stage = "DOWN"
-        count = 1
-        counter += 1
-        // console.log(counter)
+    if(nose_y > 0.4&& nose_y <0.8 ) {
+        stage = 0
     }
-    // console.log(count)
+    if(nose_y <=0.4 ){
+        stage = -1
+    }
+    console.log(stage)
+    drawLineOnCanvas(canvasCtx, 100, 100, 200, 200, 'blue'); // เส้นสีน้ำเงิน
+    drawLineOnCanvas(canvasCtx, 200, 200, 300, 100, 'red'); // เส้นสีแดง
 
-    // canvasCtx.font = "30px Arial"
-    // canvasCtx.fillStyle = "white"
-    // canvasCtx.fillText("Counts: " + counter, 320, 50)
-    // canvasCtx.restore()
+    canvasCtx.font = "30px Arial"
+    canvasCtx.fillStyle = "red"
+    canvasCtx.restore()
 
     return count
 }

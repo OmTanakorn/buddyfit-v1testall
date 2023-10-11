@@ -100,10 +100,6 @@ function onResultsPose(results) {
   }
   console.log(count)
 
-  // canvasCtx.font = "30px Arial"
-  // canvasCtx.fillStyle = "white"
-  // canvasCtx.fillText("Counts: " + counter.toString(), 320, 50)
-  // canvasCtx.restore()
 
   return count
 }
