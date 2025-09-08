@@ -4,6 +4,9 @@
 # Byte-compiled / optimized / DLL files #
 __pycache__/
 *.py[cod]
+*.pyo
+*.pyc
+**/__pycache__/
 *$py.class
 
 # Django #
@@ -12,3 +15,4 @@ db.sqlite3
 media
 
 .venv
+
