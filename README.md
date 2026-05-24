@@ -1,125 +1,146 @@
-> A batteries-included Django starter project. To learn more try the books [Django for Beginners](https://djangoforbeginners.com), [Django for APIs](https://djangoforapis.com), and [Django for Professionals](https://djangoforprofessionals.com).
+<p align="center">
+  <img src="logo.png" alt="BuddyFit Logo" width="200"/>
+</p>
 
-## 🚀 Features
+<h1 align="center">BuddyFit</h1>
+<p align="center">
+  <strong>Level up your workout. Grow your buddy.</strong><br/>
+  A gamified fitness tracker where your real-world exercise powers up a virtual character.
+</p>
 
-- Django 4.1 & Python 3.11
-- Install via [Pip](https://pypi.org/project/pip/), [Pipenv](https://pypi.org/project/pipenv/), or [Docker](https://www.docker.com/)
-- User log in/out, sign up, password reset via [django-allauth](https://github.com/pennersr/django-allauth)
-- Static files configured with [Whitenoise](http://whitenoise.evans.io/en/stable/index.html)
-- Styling with [Bootstrap v5](https://getbootstrap.com/)
-- Debugging with [django-debug-toolbar](https://github.com/jazzband/django-debug-toolbar)
-- DRY forms with [django-crispy-forms](https://github.com/django-crispy-forms/django-crispy-forms)
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.10%2B-blue?logo=python" alt="Python"/>
+  <img src="https://img.shields.io/badge/Django-4.1-green?logo=django" alt="Django"/>
+  <img src="https://img.shields.io/badge/Phaser-3.54-orange" alt="Phaser"/>
+  <img src="https://img.shields.io/badge/MediaPipe-Pose-red?logo=google" alt="MediaPipe"/>
+  <img src="https://img.shields.io/badge/version-1.0.0-brightgreen" alt="Version"/>
+</p>
 
-![Homepage](homepage_41.png)
-----
+---
 
-## Table of Contents
-* **[Installation](#installation)**
-  * [Pip](#pip)
-  * [Pipenv](#pipenv)
-  * [Docker](#docker)
-* [Next Steps](#next-steps)
-* [Contributing](#contributing)
-* [Support](#support)
-* [License](#license)
+## About
 
-----
+BuddyFit is a graduation project that makes working out fun by turning exercise into a game. Each rep you do in the real world earns your virtual buddy experience points and grows their stats. Complete challenges, climb the leaderboard, and watch your buddy evolve as you get stronger.
 
-## 📖 Installation
-DjangoX can be installed via Pip, Pipenv, or Docker. To start, clone the repo to your local computer and change into the proper directory.
+Built with love by two students who wanted to make fitness less boring. 💪
 
-```
-$ git clone https://github.com/wsvincent/djangox.git
-$ cd djangox
-```
+---
 
-### Pip
+## Features
 
-```
-$ python -m venv .venv
+| Feature | Description |
+|---------|-------------|
+| 🥚 **Buddy Creation** | Hatch a unique buddy (MINOTOR or DODO) with a random skin |
+| 💪 **Push-up Training** | Real reps → arm-power XP, tracked via webcam |
+| 🔥 **Sit-up Training** | Real reps → body-power XP, tracked via webcam |
+| 🦵 **Squat Training** | Real reps → leg-power XP, tracked via webcam |
+| ⚔️ **Challenge Mode** | Boss battle game powered by your buddy's stats |
+| 🤖 **AI Pose Detection** | MediaPipe counts your reps automatically — no buttons needed |
+| 📊 **Exercise History** | Line charts showing your training trends over time |
+| 🏆 **Leaderboard** | Top 10 global rankings by high score |
 
-# Windows
-$ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-$ .venv\Scripts\Activate.ps1
+---
 
-# macOS
-$ source .venv/bin/activate
+## Tech Stack
 
-(.venv) $ pip install -r requirements.txt
-(.venv) $ python manage.py migrate
-(.venv) $ python manage.py createsuperuser
-(.venv) $ python manage.py runserver
-# Load the site at http://127.0.0.1:8000
-```
+| Layer | Technology |
+|-------|-----------|
+| **Backend** | Django 4.1, Python 3.10 |
+| **Auth** | django-allauth (email-based) |
+| **Game Engine** | Phaser 3.54 |
+| **Pose Detection** | MediaPipe (Google ML) |
+| **Charts** | Chart.js 3.7 |
+| **Frontend** | Bootstrap 5.2, vanilla JS |
+| **Database** | SQLite (dev) / PostgreSQL (prod) |
+| **Static Files** | WhiteNoise |
+| **Production** | Gunicorn |
 
-### Pipenv
+---
 
-```
-$ pipenv install
-$ pipenv shell
-(.venv) $ python manage.py migrate
-(.venv) $ python manage.py createsuperuser
-(.venv) $ python manage.py runserver
-# Load the site at http://127.0.0.1:8000
-```
+## Getting Started
 
-### Docker
+### Prerequisites
 
-To use Docker with PostgreSQL as the database update the `DATABASES` section of `django_project/settings.py` to reflect the following:
+- Python 3.10+
+- [Pipenv](https://pipenv.pypa.io/en/latest/)
+- A webcam (for exercise tracking)
 
-```python
-# django_project/settings.py
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "postgres",
-        "USER": "postgres",
-        "PASSWORD": "postgres",
-        "HOST": "db",  # set in docker-compose.yml
-        "PORT": 5432,  # default postgres port
-    }
-}
-```
+### Installation
 
-The `INTERNAL_IPS` configuration in `django_project/settings.py` must be also be updated:
+```bash
+# 1. Clone the repository
+git clone https://github.com/omtanakorn/buddyfit-v1testall.git
+cd buddyfit-v1testall
 
-```python
-# config/settings.py
-# django-debug-toolbar
-import socket
-hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
-INTERNAL_IPS = [ip[:-1] + "1" for ip in ips]
+# 2. Install dependencies
+pipenv install
+
+# 3. Activate the virtual environment
+pipenv shell
+
+# 4. Apply database migrations
+python manage.py migrate
+
+# 5. Create an admin account
+python manage.py createsuperuser
+
+# 6. Run the development server
+python manage.py runserver
 ```
 
-And then proceed to build the Docker image, run the container, and execute the standard commands within Docker.
+Open your browser at **http://127.0.0.1:8000** and create your first buddy!
+
+### With pip (alternative)
+
+```bash
+python -m venv .venv
+source .venv/bin/activate        # macOS/Linux
+# .venv\Scripts\Activate.ps1    # Windows
+
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver
+```
+
+---
+
+## How to Play
+
+1. **Sign up** with your email and create your buddy
+2. **Train** — pick Push-ups, Sit-ups, or Squats and let your webcam count your reps
+3. **Earn XP** — each rep adds power to your buddy's corresponding stat
+4. **Challenge** — battle through boss stages using your accumulated stats
+5. **Compete** — check the leaderboard and aim for the top 10
+
+---
+
+## Project Structure
 
 ```
-$ docker-compose up -d --build
-$ docker-compose exec web python manage.py migrate
-$ docker-compose exec web python manage.py createsuperuser
-# Load the site at http://127.0.0.1:8000
+buddyfit-v1testall/
+├── buddyfit/          # Django project config (settings, urls, wsgi)
+├── accounts/          # User auth, Buddy & ExHistory models
+├── pages/             # Main app views (training, challenge, leaderboard)
+├── templates/         # HTML templates
+├── static/            # JS game scripts, CSS, images, MediaPipe detectors
+├── manage.py
+└── requirements.txt
 ```
 
-## Next Steps
+---
 
-- Add environment variables. There are multiple packages but I personally prefer [environs](https://pypi.org/project/environs/).
-- Add [gunicorn](https://pypi.org/project/gunicorn/) as the production web server.
-- Update the [EMAIL_BACKEND](https://docs.djangoproject.com/en/4.0/topics/email/#module-django.core.mail) and connect with a mail provider.
-- Make the [admin more secure](https://opensource.com/article/18/1/10-tips-making-django-admin-more-secure).
-- `django-allauth` supports [social authentication](https://django-allauth.readthedocs.io/en/latest/providers.html) if you need that.
+## Contributors
 
-I cover all of these steps in my three books: [Django for Beginners](https://djangoforbeginners.com), [Django for APIs](https://djangoforapis.com), and [Django for Professionals](https://djangoforprofessionals.com).
+This project was built as a Computer Science graduation project.
 
-----
+| Name | GitHub |
+|------|--------|
+| Tanakorn Aphiwan | [@OmTanakorn](https://github.com/OmTanakorn) |
+| Nak_last | @Nak_last |
 
-## 🤝 Contributing
-
-Contributions, issues and feature requests are welcome! See [CONTRIBUTING.md](https://github.com/wsvincent/djangox/blob/master/CONTRIBUTING.md).
-
-## ⭐️ Support
-
-Give a ⭐️  if this project helped you!
+---
 
 ## License
 
-[The MIT License](LICENSE)
+This project is open source under the [MIT License](LICENSE).
