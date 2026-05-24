@@ -137,7 +137,7 @@ This project was built as a Computer Science graduation project.
 | Name | GitHub |
 |------|--------|
 | Tanakorn Aphiwan | [@OmTanakorn](https://github.com/OmTanakorn) |
-| Nak_last | @Nak_last |
+| Nak_last | [@Nak_last(https://github.com/NakLast)] |
 
 ---
 
