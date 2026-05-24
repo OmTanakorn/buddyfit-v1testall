@@ -16,3 +16,5 @@ media
 
 .venv
 
+# Environment variables — never commit secrets
+.env

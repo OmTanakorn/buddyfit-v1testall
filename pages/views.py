@@ -1,4 +1,3 @@
-from datetime import date
 from django.contrib.auth import login, authenticate
 import json
 from django.db.models import Window
@@ -122,7 +121,6 @@ def update_pushup(request):
             ex_history = ExHistory.objects.create(
                 exType="pushup",
                 exCount=count,
-                exData=date.today(),  # สามารถใช้เวลาปัจจุบันหรือวิธีอื่นในการกำหนดเวลาได้
                 owner=owner
         )
 
@@ -141,7 +139,6 @@ def update_situp(request):
             ex_history = ExHistory.objects.create(
                 exType="situp",
                 exCount=count,
-                exData=date.today(),  # สามารถใช้เวลาปัจจุบันหรือวิธีอื่นในการกำหนดเวลาได้
                 owner=owner
             )
     return redirect('/')
@@ -159,7 +156,6 @@ def update_squat(request):
             ex_history = ExHistory.objects.create(
                 exType="squat",
                 exCount=count,
-                exData=date.today(),  # สามารถใช้เวลาปัจจุบันหรือวิธีอื่นในการกำหนดเวลาได้
                 owner=owner
             )
     return redirect('/')
