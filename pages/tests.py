@@ -116,7 +116,7 @@ class TrainingPageTests(BuddyTestCase):
                 self.assertEqual(response.status_code, 200)
                 self.assertTemplateUsed(response, template)
                 self.assertEqual(list(response.context["buddies"]), [self.buddy])
-                self.assertContains(response, "phaser@3.90.0")
+                self.assertContains(response, "phaser@4.2.1")
                 self.assertContains(response, 'type="module"')
                 self.assertNotContains(response, "@mediapipe/pose")
                 self.assertNotContains(response, "sessionStorage")

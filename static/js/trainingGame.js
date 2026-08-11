@@ -102,7 +102,7 @@ export function createTrainingGame({exercise, title, animationKey, frames}) {
   }
 
   return new Phaser.Game({
-    type: Phaser.CANVAS,
+    type: Phaser.AUTO,
     width: 600,
     height: 890,
     parent: "game-container",

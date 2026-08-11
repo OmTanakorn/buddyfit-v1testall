@@ -47,7 +47,7 @@ Built with love by two students who wanted to make fitness less boring. 💪
 |-------|-----------|
 | **Backend** | Django 5.2 LTS, Python 3.10+ |
 | **Auth** | django-allauth 65 (email-based) |
-| **Game Engine** | Phaser 3.90 |
+| **Game Engine** | Phaser 4.2.1 |
 | **Pose Detection** | MediaPipe Tasks Vision 0.10.35 (Pose Landmarker) |
 | **Charts** | Chart.js 4.5 |
 | **Frontend** | Bootstrap 5.3, vanilla JS modules |
