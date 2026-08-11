@@ -45,8 +45,8 @@ Built with love by two students who wanted to make fitness less boring. 💪
 
 | Layer | Technology |
 |-------|-----------|
-| **Backend** | Django 4.1, Python 3.10 |
-| **Auth** | django-allauth (email-based) |
+| **Backend** | Django 5.2 LTS, Python 3.10+ |
+| **Auth** | django-allauth 65 (email-based) |
 | **Game Engine** | Phaser 3.54 |
 | **Pose Detection** | MediaPipe (Google ML) |
 | **Charts** | Chart.js 3.7 |
@@ -61,8 +61,7 @@ Built with love by two students who wanted to make fitness less boring. 💪
 
 ### Prerequisites
 
-- Python 3.10+
-- [Pipenv](https://pipenv.pypa.io/en/latest/)
+- Python 3.10–3.13 (Django 5.2 LTS supports this range)
 - A webcam (for exercise tracking)
 
 ### Installation
@@ -72,11 +71,13 @@ Built with love by two students who wanted to make fitness less boring. 💪
 git clone https://github.com/omtanakorn/buddyfit-v1testall.git
 cd buddyfit-v1testall
 
-# 2. Install dependencies
-pipenv install
+# 2. Create and activate a virtual environment
+python -m venv .venv
+source .venv/bin/activate        # macOS/Linux
+# .venv\Scripts\Activate.ps1     # Windows
 
-# 3. Activate the virtual environment
-pipenv shell
+# 3. Install dependencies
+pip install -r requirements.txt
 
 # 4. Apply database migrations
 python manage.py migrate
@@ -90,17 +91,35 @@ python manage.py runserver
 
 Open your browser at **http://127.0.0.1:8000** and create your first buddy!
 
-### With pip (alternative)
+### Running the tests
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate        # macOS/Linux
-# .venv\Scripts\Activate.ps1    # Windows
+python manage.py test              # everything
+python manage.py test pages        # a single app
+```
 
-pip install -r requirements.txt
-python manage.py migrate
-python manage.py createsuperuser
-python manage.py runserver
+### Configuration
+
+Everything runs out of the box for local development. For anything else, the
+settings read these environment variables:
+
+| Variable | Default | Notes |
+|---|---|---|
+| `DJANGO_DEBUG` | `1` | **Must be `0` in production.** Turning it off also enables HTTPS-only cookies and redirects |
+| `DJANGO_SECRET_KEY` | insecure dev key | Required once `DJANGO_DEBUG=0` — the app refuses to start without it |
+| `DJANGO_ALLOWED_HOSTS` | `localhost,0.0.0.0,127.0.0.1` | Comma-separated hostnames |
+| `DJANGO_CSRF_TRUSTED_ORIGINS` | empty | Full origins with scheme, needed behind a reverse proxy |
+| `DATABASE_URL` | unset (SQLite) | `postgres://user:pass@host:5432/dbname` switches to PostgreSQL |
+| `DJANGO_SECURE_SSL` | on when `DJANGO_DEBUG=0` | Set to `0` to test a non-debug build over plain HTTP locally |
+| `CORS_ALLOWED_ORIGINS` | empty | Only needed if another origin calls this app |
+
+> **The camera needs HTTPS.** Browsers only grant `getUserMedia` on a secure
+> origin, so every deployment must be served over TLS. `localhost` is the one
+> exception, which is why development works without it.
+
+```bash
+# Before serving with DJANGO_DEBUG=0
+python manage.py collectstatic
 ```
 
 ---

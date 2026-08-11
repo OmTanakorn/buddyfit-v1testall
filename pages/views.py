@@ -50,11 +50,7 @@ def ex_history(request):
     situp_data_json = json.dumps(situp_data, cls=DjangoJSONEncoder)
     squat_data_json = json.dumps(squat_data, cls=DjangoJSONEncoder)
     
-    print(pushup_data_json)
-    print(situp_data_json)
-    print(squat_data_json)
-    
-    
+
     context = {
         'pushup_data': pushup_data_json,
         'situp_data' : situp_data_json,
@@ -126,7 +122,6 @@ def _parse_count(raw):
 def update_pushup(request):
     if request.method == 'POST':
         count = _parse_count(request.POST.get("pushup_count"))
-        print("Get post with push up count = ", count)
         owner = request.user
         buddy = get_object_or_404(Buddy, owner=owner)
         buddy.armpower += count
@@ -147,7 +142,6 @@ def update_pushup(request):
 def update_situp(request):
     if request.method == 'POST':
         count = _parse_count(request.POST.get("situp_count"))
-        print("Get post with sit up count = ", count)
         owner = request.user
         buddy = get_object_or_404(Buddy, owner=owner)
         buddy.bodypower += count
@@ -166,7 +160,6 @@ def update_situp(request):
 def update_squat(request):
     if request.method == 'POST':
         count = _parse_count(request.POST.get("squat_count"))
-        print("Get post with squat count = ", count)
         owner = request.user
         buddy = get_object_or_404(Buddy, owner=owner)
         buddy.legpower += count
@@ -188,7 +181,6 @@ def update_score(request):
         score = _parse_count(request.POST.get("score"))
         owner = request.user
         buddy = get_object_or_404(Buddy, owner=owner)
-        print("Get post with highScore = ", score)
         if(buddy.highScore <= score):
             buddy.highScore = score
             buddy.save()

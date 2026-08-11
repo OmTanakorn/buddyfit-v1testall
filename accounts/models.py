@@ -23,7 +23,7 @@ class Buddy(models.Model):
     
 class ExHistory(models.Model):
     exType = models.CharField(max_length=255)
-    exCount = models.IntegerField(10)
+    exCount = models.IntegerField()
     exData = models.DateField()
     owner = models.ForeignKey(get_user_model() , on_delete=models.CASCADE)
     def __str__(self):

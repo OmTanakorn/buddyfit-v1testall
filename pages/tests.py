@@ -25,7 +25,12 @@ WRITE_ENDPOINTS = [
 
 
 @override_settings(
-    STATICFILES_STORAGE="django.contrib.staticfiles.storage.StaticFilesStorage"
+    STORAGES={
+        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"
+        },
+    }
 )
 class BaseTestCase(TestCase):
     """ปิด manifest storage ระหว่างเทสต์

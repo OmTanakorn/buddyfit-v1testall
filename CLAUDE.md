@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
-A `.venv` already exists in the repo root (the README also documents a pipenv flow).
+A `.venv` already exists in the repo root. `requirements.txt` is the only dependency file.
 
 ```bash
 source .venv/bin/activate
@@ -13,18 +13,19 @@ python manage.py runserver            # http://127.0.0.1:8000
 python manage.py migrate
 python manage.py makemigrations accounts   # only `accounts` holds models
 python manage.py createsuperuser
-python manage.py collectstatic        # required before serving with DEBUG=False
-```
+python manage.py collectstatic        # required before serving with DJANGO_DEBUG=0
 
-Tests use Django's runner (`accounts/tests.py` and `pages/tests.py` are still empty stubs):
-
-```bash
 python manage.py test                 # all
 python manage.py test pages           # one app
-python manage.py test pages.tests.SomeTest.test_case   # single test
+python manage.py test pages.tests.ScoreUpdateTests.test_a_lower_score_is_ignored
+
+# what a production boot looks like; must stay clean
+DJANGO_DEBUG=0 DJANGO_SECRET_KEY=... python manage.py check --deploy
 ```
 
-Dependency files have drifted: `requirements.txt` is the current one (allauth 0.52, crispy-forms 2.0, `django-cors-headers`); `Pipfile` still pins older versions and omits corsheaders. Prefer `requirements.txt`.
+Settings are environment-driven (`DJANGO_DEBUG`, `DJANGO_SECRET_KEY`, `DJANGO_ALLOWED_HOSTS`, `DJANGO_CSRF_TRUSTED_ORIGINS`, `DATABASE_URL`, `DJANGO_SECURE_SSL`, `CORS_ALLOWED_ORIGINS`) — see the table in README.md. Defaults are tuned for local development; `DJANGO_DEBUG=0` refuses to boot without an explicit secret key and turns on HTTPS-only cookies and redirects.
+
+Two settings branch on `DEBUG` at import time, which is worth knowing before changing either: `debug_toolbar` is only appended to `INSTALLED_APPS`/`MIDDLEWARE` when debugging, and static files only go through WhiteNoise's manifest storage when not debugging. Tests run with `DEBUG=False`, so `BaseTestCase` in `pages/tests.py` overrides `STORAGES` back to plain storage — otherwise every page using `{% static %}` fails on a missing manifest entry unless `collectstatic` has run.
 
 ## Architecture
 
@@ -61,7 +62,7 @@ Consequences to respect when editing these files:
 ### Conventions
 
 - Code comments and commit-message prose in this repo are written in Thai. Match the surrounding language when editing a file.
-- Templates reference game assets with hardcoded relative paths (`../static/images/...`) inside JS strings rather than `{% static %}`. These bypass WhiteNoise's `CompressedManifestStaticFilesStorage` hashing, so they only resolve under the dev server / root-mounted `STATIC_URL`.
-- `buddyfit/settings.py` is a DjangoX-derived starter: `DEBUG = True`, hardcoded `SECRET_KEY`, `CORS_ALLOW_ALL_ORIGINS = True`, console email backend, commented-out Postgres block. Treat it as dev-only config.
+- Templates reference game assets with hardcoded relative paths (`../static/images/...`) inside JS strings rather than `{% static %}`. `collectstatic` keeps an unhashed copy of every file, so these still resolve in production — they just lose cache busting, and they break if `STATIC_URL` ever stops being root-mounted. Anything going through `{% static %}` must not carry a `./` prefix; the manifest has no entry for `./images/x.png`.
+- The email backend still writes to the console, so password-reset links only appear in the server log. Real delivery is unconfigured.
 - Auth is email-based allauth over `AUTH_USER_MODEL = "accounts.CustomUser"`; login/signup/password templates are overridden in `templates/account/`.
 - Buddy skin is not user-chosen — `accounts/forms.py:RandomSkinWidget` picks `MINOTOR` or `DODO` at render time inside a hidden input.
