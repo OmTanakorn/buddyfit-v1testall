@@ -36,6 +36,7 @@ def leaderboard(request):
     # ส่งข้อมูลไปยัง HTML template
     return render(request, 'pages/leaderboard.html', context)
 
+@login_required
 def ex_history(request):
     user = request.user
     ex_history = ExHistory.objects.filter(owner=user).order_by('-exData')
@@ -62,6 +63,7 @@ def ex_history(request):
     
     return render(request, 'pages/ex_history.html', context)
 
+@login_required
 def pushup(request):
     # ดึงข้อมูล Buddy ของผู้ใช้งานปัจจุบัน
     buddies = Buddy.objects.filter(owner=request.user)
@@ -70,6 +72,7 @@ def pushup(request):
     }
     return render(request, 'pages/pushup.html', context)
 
+@login_required
 def situp(request):
     # ดึงข้อมูล Buddy ของผู้ใช้งานปัจจุบัน
     buddies = Buddy.objects.filter(owner=request.user)
@@ -78,6 +81,7 @@ def situp(request):
     }
     return render(request, 'pages/situp.html', context)
 
+@login_required
 def squat(request):
     # ดึงข้อมูล Buddy ของผู้ใช้งานปัจจุบัน
     buddies = Buddy.objects.filter(owner=request.user)
@@ -87,6 +91,7 @@ def squat(request):
     return render(request, 'pages/squat.html', context)
 
 #challenge
+@login_required
 def challenge(request):
     # ดึงข้อมูล Buddy ของผู้ใช้งานปัจจุบัน
     buddies = Buddy.objects.filter(owner=request.user)
@@ -96,6 +101,7 @@ def challenge(request):
     return render(request, 'pages/challenge.html', context)
 
 
+@login_required
 def create_buddy(request):
     if request.method == 'POST':
         form = BuddyForm(request.POST)
