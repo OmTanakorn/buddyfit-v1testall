@@ -48,6 +48,7 @@ class gamec extends Phaser.Scene {
         this.hp = 200 + 100; // HP เริ่มต้น
         this.level = 1;
         this.score = 0;
+        this.timer = 0;
         // สร้างอนิเมชั่นสำหรับการวิ่งของตัวละคร
         this.anims.create({
             key: 'run_anim',
@@ -128,7 +129,10 @@ class gamec extends Phaser.Scene {
             this.timer = 0;
         }
 
-        if (this.player.body.touching.down && stage === 0) {
+        // stage เป็น global จาก challenge.js (pose detection) ถ้าไฟล์นั้นโหลดไม่ทัน/ตาย ให้ถือว่า 0
+        const stageNow = (typeof stage === 'undefined') ? 0 : stage;
+
+        if (this.player.body.touching.down && stageNow === 0) {
             this.playerJumps = 0;
             this.playAnimation(this.player, 'run_anim');
             this.player.setSize(144, 192);
@@ -136,13 +140,13 @@ class gamec extends Phaser.Scene {
             this.player.setOffset(0, this.player.height - 192);
         }
     
-        if (stage === -1 && this.playerJumps < 1) {
+        if (stageNow === -1 && this.playerJumps < 1) {
             this.player.setVelocityY(-500);
             this.playAnimation(this.player, 'jump_anim');
             this.playerJumps += 1;
         }
     
-        if (stage === 1) {
+        if (stageNow === 1) {
             this.playAnimation(this.player, 'slide_anim');
             this.player.setGravityY(1000);
 

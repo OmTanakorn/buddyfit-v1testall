@@ -108,9 +108,18 @@ def create_buddy(request):
         form = BuddyForm()
     return render(request, 'pages/create.html', {'form': form, 'buddy': None})
 
+def _parse_count(raw):
+    """แปลงค่า count จากฟอร์ม ถ้าว่าง/พัง ให้เป็น 0 แทนที่จะ 500"""
+    try:
+        return int(float(raw or 0))
+    except (TypeError, ValueError):
+        return 0
+
+
+@login_required
 def update_pushup(request):
     if request.method == 'POST':
-        count = int(request.POST["pushup_count"]);
+        count = _parse_count(request.POST.get("pushup_count"))
         print("Get post with push up count = ", count)
         owner = request.user
         buddy = get_object_or_404(Buddy, owner=owner)
@@ -128,9 +137,10 @@ def update_pushup(request):
 
     return redirect('/')
 
+@login_required
 def update_situp(request):
     if request.method == 'POST':
-        count = int(request.POST["situp_count"]);
+        count = _parse_count(request.POST.get("situp_count"))
         print("Get post with sit up count = ", count)
         owner = request.user
         buddy = get_object_or_404(Buddy, owner=owner)
@@ -146,9 +156,10 @@ def update_situp(request):
             )
     return redirect('/')
 
+@login_required
 def update_squat(request):
     if request.method == 'POST':
-        count = int(request.POST["squat_count"]);
+        count = _parse_count(request.POST.get("squat_count"))
         print("Get post with squat count = ", count)
         owner = request.user
         buddy = get_object_or_404(Buddy, owner=owner)
@@ -164,9 +175,11 @@ def update_squat(request):
             )
     return redirect('/')
 
+@login_required
 def update_score(request):
     if request.method == 'POST':
-        score = int(request.POST["score"]);
+        # หน้าเกมอาจส่งค่าว่าง "null" หรือทศนิยมมา ถ้าผู้เล่นยังไม่จบเกม
+        score = _parse_count(request.POST.get("score"))
         owner = request.user
         buddy = get_object_or_404(Buddy, owner=owner)
         print("Get post with highScore = ", score)

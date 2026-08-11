@@ -1,3 +1,15 @@
+// ประกาศไว้บนสุดก่อนเรียกอะไรที่พึ่ง CDN (mediapipe/control_utils)
+// ถ้า CDN ล่ม ไฟล์นี้จะ throw กลางทาง แต่ stage ต้องมีค่าแล้ว ไม่งั้น gamec.update() พังทุกเฟรม
+// ใช้ var เพื่อให้ผูกกับ window ให้ scene อ่านได้แม้ไฟล์นี้ตายทีหลัง
+var nose_y = 0.5
+var right_index_x = 0.5
+var stage = 0
+var count = 0
+
+var atk = 0
+var astats = 0
+var cLatk = 0
+
 const video = document.getElementsByClassName('input_video')[0]
 const out = document.getElementsByClassName('output')[0]
 const controlsElement = document.getElementsByClassName('control')[0]
@@ -9,16 +21,6 @@ const spinner = document.querySelector('.loading')
 spinner.ontransitionend = () => {
     spinner.style.display = 'none'
 }
-
-// let push count stuff
-let nose_y = 0.5
-let right_index_x = 0.5
-let stage = 0
-let count = 0
-
-let atk = 0
-let astats = 0
-let cLatk = 0
 
 function zColor(data) {
     const z = clamp(data.from.z + 0.5, 0, 1)
@@ -38,6 +40,13 @@ function drawLineOnCanvas(canvasCtx, startX, startY, endX, endY, color) {
 function onResultsPose(results) {
     document.body.classList.add('loaded')
     fpsControl.tick()
+
+    // ถ้าไม่เจอคนในเฟรม poseLandmarks จะเป็น undefined -> ข้ามเฟรมนี้ ไม่งั้น throw แล้ว stage ค้าง
+    if (!results.poseLandmarks) {
+        canvasCtx.clearRect(0, 0, out.width, out.height)
+        canvasCtx.drawImage(results.image, 0, 0, out.width, out.height)
+        return count
+    }
 
     canvasCtx.save()
     canvasCtx.clearRect(0, 0, out.width, out.height)

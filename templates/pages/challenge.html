@@ -12,7 +12,6 @@
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.54.0/dist/phaser.min.js"></script>
     <div id="game-container" ></div>
     <script src="{% static 'js/gameChallenge.js'%}"></script>
-    <script src="{% static 'js/gameChallengeBoss.js'%}"></script>
     <script src="{% static 'js/gameChallengeStart.js'%}"></script>
     <script src="{% static 'js/gameChallengeEnd.js'%}"></script>
     <script>
@@ -22,11 +21,12 @@
         height: 600, // ปรับความสูงตามความเหมาะสม
         parent: 'game-container',
         physics : {
-          default : "arcade",},
+          default : "arcade",
           arcade: {
-            debug: true,
+            debug: false, // ตั้ง true เพื่อโชว์กรอบ hitbox ตอน debug
           },
-        scene: [gameStart, gamecboss, gamec ,gameEnd] // นำ Scene ที่สร้างขึ้นเข้ามาในเกม
+        },
+        scene: [gameStart, gamec, gameEnd] // นำ Scene ที่สร้างขึ้นเข้ามาในเกม
     };
     
     //สร้างเกม
@@ -45,9 +45,16 @@
     <button class="change-btn" id="doneButton"><h1>Replay</h1></button>
 
     <script>
+      // sessionStorage คืน null ถ้ายังไม่เคยจบเกม -> ต้องกันไว้ ไม่งั้น POST score="" แล้ว view 500
+      function readScore() {
+        return Math.floor(Number(sessionStorage.getItem("score"))) || 0;
+      }
+
       $(document).ready(function () {
         $('#doneButton').click(function () {
-            var score = $('#endScore').val();
+            // อ่านคะแนนตอนกดปุ่ม ไม่ใช่ตอนโหลดหน้า เพราะเกมเพิ่งเขียน sessionStorage ตอนจบเกม
+            var score = readScore();
+            $('#endScore').val(score);
             var csrftoken = $("[name=csrfmiddlewaretoken]").val(); // รับค่า CSRF Token จากแบบฟอร์ม
 
             $.ajax({
@@ -67,9 +74,9 @@
     </script>
     
     {% comment %} สำหรับบันทึกค่า {% endcomment %}
-    <form action="/update_score" method="post">
+    <form action="/update_score" method="post" id="doneForm">
       {% csrf_token %}
-      <input type="hidden"  name="score" id="endScore">
+      <input type="hidden"  name="score" id="endScore" value="0">
       <button class="save-btn"><h1>Done</h1></button>
     </form>
     
@@ -79,12 +86,13 @@
       <div class="spinner"></div>
     </div>
     <div style="visibility: hidden" class="control"></div>
-    <script src="../static/js/Challenge.js"> </script>
+    <script src="{% static 'js/challenge.js' %}"> </script>
 
     <script>
-      document.getElementById("endScore").value = 0;
-      document.getElementById("endScore").value = sessionStorage.getItem("score");
-      console.log(endScore)
+      // ปุ่ม Done submit ฟอร์มตรง ๆ จึงต้อง sync คะแนนล่าสุดลง hidden input ก่อน submit
+      document.getElementById("doneForm").addEventListener("submit", function () {
+        document.getElementById("endScore").value = readScore();
+      });
     </script>
     
 

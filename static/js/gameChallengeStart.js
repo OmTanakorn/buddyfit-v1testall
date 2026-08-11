@@ -5,8 +5,8 @@ class gameStart extends Phaser.Scene {
 
     preload() {
 
-        this.load.image("start1", "../static/images/assets/challenge/start1.png");
-        this.load.image("start2", "../static/images/assets/challenge/start2.png");
+        this.load.image("start1", "../static/images/assets/challenge/Start1.png");
+        this.load.image("start2", "../static/images/assets/challenge/Start2.png");
 
         this.load.image("Logo", "../static/images/assets/challenge/Logo.png");
 
@@ -24,7 +24,7 @@ class gameStart extends Phaser.Scene {
         this.load.image("nik5", "../static/images/assets/challenge/stw-5.png");
         this.load.image("block1", "../static/images/assets/challenge/block1.png");
 
-        this.load.image("HP", "../static/images/assets/challenge/HP_Bar.png")
+        this.load.image("HP", "../static/images/assets/challenge/HP_bar.png")
         
         this.load.spritesheet("player" , "../static/images/assets/challenge/Momotaros_run.png",
                                     {frameWidth:144, frameHeight:192 ,startFrame:0 ,endFrame:2});
@@ -58,7 +58,7 @@ class gameStart extends Phaser.Scene {
         // Handle start button click event
         startButton.on('pointerdown', () => {
 
-            this.scene.start("gamecboss"); // Start the "gamec" scene when the button is clicked
+            this.scene.start("gamec"); // Start the "gamec" scene when the button is clicked
         });
     }
 
