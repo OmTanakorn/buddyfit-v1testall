@@ -7,18 +7,77 @@ class gamec extends Phaser.Scene {
         this.level = 0;
         this.isRunningAnim = false;
         this.currentAnimKey = '';
+        this.poseStage = 0;
+        this.runCompleted = false;
+        this.runSpeed = 340;
+        this.donutsCollected = 0;
     }
 
-    addObstacle(x, y) {
-        let obstacle = this.add.image(x,y,"donut")
-    
-        // เปลี่ยนคุณสมบัติต่าง ๆ ของสิ่งกีดขวางตามความต้องการ เช่น ใส่ physics, collider, เป็นต้น
-        this.physics.add.existing(obstacle); // เพิ่ม physics ให้สิ่งกีดขวาง
-        obstacle.body.setVelocityX(-200);
-        obstacle.body.setImmovable(true); // ทำให้สิ่งกีดขวางไม่เคลื่อนไหวเมื่อถูกชน
-    
-        // เพิ่มสิ่งกีดขวางลงในกลุ่ม obstacleGroup (ถ้าคุณมีกลุ่มสำหรับการจัดการสิ่งกีดขวาง)
-        this.obstacleGroup.add(obstacle);
+    addDonut(x, y) {
+        const donut = this.physics.add.image(x, y, 'donut');
+        donut.setScale(1.35);
+
+        // ภาพโดนัทเป็นทรงกลม จึงใช้ hitbox วงกลมที่เล็กกว่าขอบภาพเล็กน้อย
+        // เพื่อให้ระยะที่ผู้เล่นมองเห็นตรงกับจังหวะที่เก็บโดนัทได้มากขึ้น
+        const radius = Math.floor(Math.min(donut.width, donut.height) * 0.36);
+        donut.setCircle(
+            radius,
+            (donut.width / 2) - radius,
+            (donut.height / 2) - radius,
+        );
+
+        donut.body.setAllowGravity(false);
+        donut.body.setImmovable(true);
+        donut.body.setVelocityX(-this.runSpeed);
+        this.donutGroup.add(donut);
+    }
+
+    addDonutPattern(startX, groundY = 430) {
+        const patterns = [
+            [0, 0, 0, 0, 0, 0],
+            [0, -45, -80, -100, -80, -45, 0],
+            [0, -35, -70, -35, 0, -35, -70, -35],
+        ];
+        const pattern = Phaser.Utils.Array.GetRandom(patterns);
+
+        pattern.forEach((offsetY, index) => {
+            this.addDonut(startX + (index * 58), groundY + offsetY);
+        });
+    }
+
+    collectDonut(player, donut) {
+        const popupX = donut.x;
+        const popupY = donut.y;
+        donut.destroy();
+
+        this.donutsCollected += 1;
+        this.score += 10;
+        this.donutText.setText(`Donuts: ${this.donutsCollected}`);
+
+        const popup = this.add.text(popupX, popupY, '+10', {
+            fontSize: '22px',
+            fontFamily: 'minecraft',
+            color: '#ffd75e',
+            stroke: '#7a3100',
+            strokeThickness: 4,
+        }).setOrigin(0.5);
+
+        this.tweens.add({
+            targets: popup,
+            y: popupY - 45,
+            alpha: 0,
+            duration: 450,
+            ease: 'Cubic.easeOut',
+            onComplete: () => popup.destroy(),
+        });
+
+        this.tweens.add({
+            targets: this.player,
+            scaleX: 0.66,
+            scaleY: 0.66,
+            yoyo: true,
+            duration: 80,
+        });
     }
 
     addPlatform(width, x, y, type) {
@@ -29,8 +88,9 @@ class gamec extends Phaser.Scene {
         }
         
         this.physics.add.existing(platform);
-        platform.body.setVelocityX(-200);
+        platform.body.setVelocityX(-this.runSpeed);
         platform.body.setImmovable(true);
+        platform.body.setAllowGravity(false);
         this.platformGroup.add(platform);
     }
 
@@ -38,6 +98,25 @@ class gamec extends Phaser.Scene {
         if (player.anims.currentAnim.key !== animationKey) {
             player.play(animationKey);
         }
+    }
+
+    setPlayerHitbox(width, height) {
+        this.player.setSize(width, height);
+        this.player.setOffset(
+            (this.player.width - width) / 2,
+            this.player.height - height,
+        );
+    }
+
+    completeRun() {
+        if (this.runCompleted) return;
+        this.runCompleted = true;
+        const score = Math.floor(this.score);
+        this.registry.set('score', score);
+        window.dispatchEvent(
+            new CustomEvent('buddyfit:challenge-complete', {detail: {score}})
+        );
+        this.scene.start('gameEnd');
     }
 
     preload() {
@@ -48,26 +127,38 @@ class gamec extends Phaser.Scene {
         this.hp = 200 + 100; // HP เริ่มต้น
         this.level = 1;
         this.score = 0;
+        this.poseStage = 0;
+        this.runCompleted = false;
+        this.runSpeed = 340;
+        this.donutsCollected = 0;
         this.timer = 0;
+
+        const onPoseState = (event) => {
+            this.poseStage = event.detail.stage;
+        };
+        window.addEventListener('buddyfit:pose-state', onPoseState);
+        this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+            window.removeEventListener('buddyfit:pose-state', onPoseState);
+        });
         // สร้างอนิเมชั่นสำหรับการวิ่งของตัวละคร
         this.anims.create({
             key: 'run_anim',
             frames: this.anims.generateFrameNumbers('player', { start: 0, end: 2 }),
-            frameRate: 7,
+            frameRate: 12,
             repeat: -1 // เล่นวนไปเรื่อย ๆ
         });
         // สร้างอนิเมชั่นสำหรับการกระโดดของตัวละคร
         this.anims.create({
             key: 'jump_anim',
             frames: this.anims.generateFrameNumbers('player_jump', { start: 0, end: 3 }),
-            frameRate: 7,
+            frameRate: 10,
             repeat: 0 // ไม่เล่นวน
         });
         // สร้างอนิเมชั่นสำหรับการสไลด์ของตัวละคร
         this.anims.create({
             key: 'slide_anim',
             frames: this.anims.generateFrameNumbers('player_slide', { start: 0, end: 1 }),
-            frameRate: 7,
+            frameRate: 12,
             repeat: 1, // ไม่เล่นวน
             repeatDelay: 2000
         });
@@ -100,92 +191,82 @@ class gamec extends Phaser.Scene {
             fill: '#fff'
         }).setOrigin(1, 0); // ตั้งตำแหน่งให้อยู่บนขวาบน
 
+        this.donutText = this.add.text(760, 52, 'Donuts: 0', {
+            fontSize: '20px',
+            fontFamily: 'minecraft',
+            fill: '#ffd75e',
+            stroke: '#5b2600',
+            strokeThickness: 3,
+        }).setOrigin(1, 0);
+
         this.player = this.physics.add.sprite(100,400, 'player');
         this.player.play('run_anim');
         this.player.setScale(0.6);
         this.player.setOrigin(1, 1)
-        this.player.setGravityY(800);
+        this.player.setGravityY(1100);
+        this.setPlayerHitbox(90, 170);
         this.playerJumps = 0;
 
-        this.obstacleGroup = this.add.group();
-        this.addObstacle(800, 430);
-    
         this.platformGroup = this.add.group();
-        this.addPlatform(1000, 10, 550, 1);
+        this.addPlatform(1300, -200, 550, 1);
 
-        this.physics.add.collider(this.player, this.platformGroup);    
+        this.donutGroup = this.physics.add.group({
+            allowGravity: false,
+            immovable: true,
+        });
+        this.addDonutPattern(420);
+
+        this.physics.add.collider(this.player, this.platformGroup);
+        this.physics.add.overlap(
+            this.player,
+            this.donutGroup,
+            this.collectDonut,
+            null,
+            this,
+        );
     }
 
     update(time, delta) {
         
         this.timer += delta / 1000; // เวลาเป็นมิลลิวินาที แปลงเป็นวินาที
         
-        if (this.timer >= 5) {
-            // ทำงานที่คุณต้องการเมื่อผ่านไป 5 วินาที
-            console.log('Passed 5 seconds!');
-            console.log('Player X:', this.player.x);
-            console.log('Player Y:', this.player.y);
-            
-            this.timer = 0;
-        }
-
-        // stage เป็น global จาก challenge.js (pose detection) ถ้าไฟล์นั้นโหลดไม่ทัน/ตาย ให้ถือว่า 0
-        const stageNow = (typeof stage === 'undefined') ? 0 : stage;
+        const stageNow = this.poseStage;
 
         if (this.player.body.touching.down && stageNow === 0) {
             this.playerJumps = 0;
             this.playAnimation(this.player, 'run_anim');
-            this.player.setSize(144, 192);
-            //ปรับตำแหน่ง hitbox ให้อยู่กลางของ Sprite
-            this.player.setOffset(0, this.player.height - 192);
+            this.player.setGravityY(1100);
+            this.setPlayerHitbox(90, 170);
         }
     
         if (stageNow === -1 && this.playerJumps < 1) {
-            this.player.setVelocityY(-500);
+            this.player.setVelocityY(-620);
             this.playAnimation(this.player, 'jump_anim');
+            this.setPlayerHitbox(90, 170);
             this.playerJumps += 1;
         }
     
         if (stageNow === 1) {
             this.playAnimation(this.player, 'slide_anim');
-            this.player.setGravityY(1000);
-
-            this.player.setSize(144, 90);
-            //ปรับตำแหน่ง hitbox ให้อยู่กลางของ Sprite
-            this.player.setOffset(0, this.player.height - 90);
+            this.player.setGravityY(1300);
+            this.setPlayerHitbox(105, 75);
         }
 
-        this.physics.overlap(this.player, this.obstacleGroup, (player, obstacle) => {
-            this.hp = this.hp -100;
-            this.hpper = this.hp/100;
-            this.hpbar.setScale(this.hpper,1);
-            // ลบสิ่งกีดขวางออกจาก this.obstacleGroup
-            this.obstacleGroup.remove(obstacle);
-            obstacle.destroy(); // ลบออกจากที่ทำงานทั่วไป
-        });
-
-        if(this.hp <= 0){
-            this.scene.start("gameEnd", { score: this.score });
-            this.registry.set('score', this.score);
-            sessionStorage.setItem("score", Math.floor(this.score));
-        }
-            
-
-        // if (this.isSlide == 1 && this.player.play == 'run_anim') {
-        //     this.player.play('slide_anim');
-        // }
         this.player.x = 100;
-        
-        this.sky2.tilePositionX += 0.5;
-        this.sky3.tilePositionX += 0.8;
-        this.sky4.tilePositionX += 1.2;
 
-        this.score += ((1/50)*1.4); // เพิ่มคะแนนขึ้นทีละ 1 ทุกเฟรม + เพิ่มขึ้นตาม level ของตัวละคร
+        // ใช้ delta เพื่อให้ความเร็วเท่ากันบนจอ 60/120Hz และเร่งตามคะแนน
+        this.runSpeed = Math.min(500, 340 + (this.score * 0.18));
+        const scrollStep = (this.runSpeed * delta) / 1000;
+        this.sky.tilePositionX += scrollStep * 0.08;
+        this.sky2.tilePositionX += scrollStep * 0.22;
+        this.sky3.tilePositionX += scrollStep * 0.48;
+        this.sky4.tilePositionX += scrollStep * 0.78;
+
+        this.score += delta * 0.002;
         
         if(this.player.y > 720) {
-            this.scene.start("gameEnd");
-            this.registry.set('score', this.score);
-            sessionStorage.setItem("score", Math.floor(this.score));
+            this.completeRun();
+            return;
         }
         
         if(this.score > 200 && this.level == 1){
@@ -204,34 +285,32 @@ class gamec extends Phaser.Scene {
         // อัปเดตข้อความคะแนนบนหน้าจอ
         this.scoreText.setText('Score: ' + Math.floor(this.score));
 
-        this.obstacleGroup.getChildren().forEach((obstacle) => {
-            if(obstacle.x < (obstacle.displayWidth /2)-100){
-                this.obstacleGroup.killAndHide(obstacle);
-                this.obstacleGroup.remove(obstacle);
-                console.log("KILL obstacle")
-                }
-            });
-                    
-        let minDistance = 500; // เปลี่ยนเป็นการสุ่มค่าในช่วงที่คุณต้องการ
-        this.platformGroup.getChildren().forEach((platform) => {
-            let platformDistance = 800 - platform.x - (platform.displayWidth / 2);
-            minDistance = Math.min(minDistance, platformDistance);
-            
-            if (platform.x < -platform.displayWidth / 2) {
-                this.platformGroup.killAndHide(platform);
-                this.platformGroup.remove(platform);
-        }
+        this.donutGroup.getChildren().forEach((donut) => {
+            donut.body.setVelocityX(-this.runSpeed);
+            if (donut.x < -80) donut.destroy();
         });
 
-        if (minDistance > Phaser.Math.Between(200, 400)) { // เปลี่ยนเป็นการสุ่มค่าในช่วงที่คุณต้องการ
-            let platformWidth = Phaser.Math.Between(400, 600); // เปลี่ยนเป็นการสุ่มค่าในช่วงที่คุณต้องการ
-            this.addPlatform(platformWidth, 800, 550, 1);
-            let obstacleX = 800 + platformWidth / 2; // กำหนด x ให้เป็นค่าตรงกลางของ platformWidth
-            if(Phaser.Math.Between(1,4) == 1){
-                this.addObstacle(obstacleX, 430);
+        let rightmostEdge = 0;
+        this.platformGroup.getChildren().forEach((platform) => {
+            platform.body.setVelocityX(-this.runSpeed);
+            rightmostEdge = Math.max(
+                rightmostEdge,
+                platform.x + (platform.displayWidth / 2),
+            );
+            if (platform.x < -platform.displayWidth / 2) {
+                platform.destroy();
             }
+        });
 
+        if (rightmostEdge < 1150) {
+            const gap = Phaser.Math.Between(90, 160);
+            const platformWidth = Phaser.Math.Between(560, 780);
+            const platformStart = Math.max(800, rightmostEdge + gap);
+            this.addPlatform(platformWidth, platformStart, 550, 1);
+
+            // มีโดนัทแทบทุกช่วง สลับตำแหน่งต่ำ/สูงให้ต้องวิ่ง กระโดด และสไลด์
+            const patternY = Phaser.Math.Between(0, 3) === 0 ? 355 : 430;
+            this.addDonutPattern(platformStart + 80, patternY);
         }
     }
 }
-

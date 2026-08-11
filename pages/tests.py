@@ -2,6 +2,7 @@ import json
 from datetime import date
 
 from django.contrib.auth import get_user_model
+from django.db import IntegrityError, transaction
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
@@ -85,6 +86,7 @@ class HomeViewTests(BuddyTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "pages/home.html")
         self.assertEqual(list(response.context["buddies"]), [self.buddy])
+        self.assertContains(response, "bootstrap@5.3.8")
 
     def test_redirects_to_create_buddy_when_the_user_has_none(self):
         self.buddy.delete()
@@ -114,6 +116,16 @@ class TrainingPageTests(BuddyTestCase):
                 self.assertEqual(response.status_code, 200)
                 self.assertTemplateUsed(response, template)
                 self.assertEqual(list(response.context["buddies"]), [self.buddy])
+                self.assertContains(response, "phaser@3.90.0")
+                self.assertContains(response, 'type="module"')
+                self.assertNotContains(response, "@mediapipe/pose")
+                self.assertNotContains(response, "sessionStorage")
+
+    def test_challenge_uses_fetch_without_jquery(self):
+        response = self.client.get(reverse("pages:challenge"))
+        self.assertContains(response, "fetch(form.action")
+        self.assertNotContains(response, "jquery")
+        self.assertNotContains(response, "$.ajax")
 
 
 class CreateBuddyTests(BaseTestCase):
@@ -152,6 +164,19 @@ class CreateBuddyTests(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Buddy.objects.count(), 0)
 
+    def test_user_with_a_buddy_cannot_create_another_one(self):
+        first = Buddy.objects.create(name="First", skinname="DODO", owner=self.user)
+        response = self.client.post(
+            reverse("pages:create_buddy"), {"name": "Second", "skinname": "MINOTOR"}
+        )
+        self.assertRedirects(response, "/", fetch_redirect_response=False)
+        self.assertEqual(list(Buddy.objects.filter(owner=self.user)), [first])
+
+    def test_database_rejects_a_second_buddy_for_the_same_user(self):
+        Buddy.objects.create(name="First", skinname="DODO", owner=self.user)
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            Buddy.objects.create(name="Second", skinname="MINOTOR", owner=self.user)
+
 
 class ExerciseUpdateTests(BuddyTestCase):
     def test_a_valid_count_raises_the_matching_stat(self):
@@ -184,7 +209,7 @@ class ExerciseUpdateTests(BuddyTestCase):
 
     def test_junk_payloads_are_treated_as_zero(self):
         # หน้าเกมส่งค่าพวกนี้มาจริงเมื่อผู้เล่นยังไม่จบเซ็ต เคยทำให้ int() พัง 500
-        for payload in ["", "null", "undefined", "NaN", "abc", None]:
+        for payload in ["", "null", "undefined", "NaN", "inf", "-inf", "abc", None]:
             for name, field, stat in WRITE_ENDPOINTS:
                 with self.subTest(view=name, payload=payload):
                     data = {} if payload is None else {field: payload}
@@ -201,6 +226,20 @@ class ExerciseUpdateTests(BuddyTestCase):
         self.client.post(reverse("pages:update_pushup"), {"pushup_count": "0"})
         self.assertEqual(self.reload_buddy().armpower, 0)
         self.assertEqual(ExHistory.objects.count(), 0)
+
+    def test_a_negative_count_is_clamped_to_zero(self):
+        self.buddy.armpower = 100
+        self.buddy.save()
+        self.client.post(reverse("pages:update_pushup"), {"pushup_count": "-50"})
+        self.assertEqual(self.reload_buddy().armpower, 100)
+        self.assertEqual(ExHistory.objects.count(), 0)
+
+    def test_an_excessive_count_is_clamped_to_the_submission_limit(self):
+        self.client.post(
+            reverse("pages:update_pushup"), {"pushup_count": "999999"}
+        )
+        self.assertEqual(self.reload_buddy().armpower, 1000)
+        self.assertEqual(ExHistory.objects.get().exCount, 1000)
 
     def test_get_changes_nothing(self):
         for name, _, stat in WRITE_ENDPOINTS:
@@ -240,6 +279,10 @@ class ScoreUpdateTests(BuddyTestCase):
         self.client.post(reverse("pages:update_score"), {"score": "120"})
         buddy = self.reload_buddy()
         self.assertEqual((buddy.armpower, buddy.bodypower, buddy.legpower), (0, 0, 0))
+
+    def test_an_excessive_score_is_clamped_to_the_submission_limit(self):
+        self.client.post(reverse("pages:update_score"), {"score": "999999"})
+        self.assertEqual(self.reload_buddy().highScore, 1000)
 
 
 class ExHistoryViewTests(BuddyTestCase):
@@ -287,6 +330,11 @@ class ExHistoryViewTests(BuddyTestCase):
         for key in ["pushup_data", "situp_data", "squat_data"]:
             self.assertEqual(json.loads(response.context[key]), [])
 
+    def test_uses_chart_js_4(self):
+        response = self.client.get(reverse("pages:ex_history"))
+        self.assertContains(response, "chart.js@4.5.1")
+        self.assertNotContains(response, "Chart.js/3.7")
+
 
 class LeaderboardTests(BaseTestCase):
     def test_buddies_are_ordered_by_high_score_descending(self):
@@ -302,22 +350,3 @@ class LeaderboardTests(BaseTestCase):
         response = self.client.get(reverse("pages:leaderboard"))
         scores = [buddy.highScore for buddy in response.context["buddies"]]
         self.assertEqual(scores, [300, 150, 50])
-
-
-class KnownGapTests(BuddyTestCase):
-    """พฤติกรรมที่ยังผิดอยู่ ล็อกไว้ให้เห็นชัด ถ้าแก้เมื่อไหร่ test พวกนี้ต้องถูกเขียนใหม่"""
-
-    def test_a_negative_count_still_drains_the_stat(self):
-        # client ส่ง -50 ได้ตรง ๆ _parse_count ไม่กันค่าติดลบ
-        self.buddy.armpower = 100
-        self.buddy.save()
-        self.client.post(reverse("pages:update_pushup"), {"pushup_count": "-50"})
-        self.assertEqual(self.reload_buddy().armpower, 50)
-
-    def test_a_second_buddy_breaks_every_write_endpoint(self):
-        # create_buddy ไม่กันการสร้าง buddy ตัวที่สอง แต่ update_* ใช้ get_object_or_404
-        Buddy.objects.create(name="Second", skinname="MINOTOR", owner=self.user)
-        # assertLogs กลืน traceback ของ django.request ไม่ให้รกผลเทสต์
-        with self.assertLogs("django.request", level="ERROR"):
-            with self.assertRaises(Buddy.MultipleObjectsReturned):
-                self.client.post(reverse("pages:update_pushup"), {"pushup_count": "7"})

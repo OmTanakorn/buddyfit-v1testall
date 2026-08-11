@@ -9,10 +9,10 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Python-3.10%2B-blue?logo=python" alt="Python"/>
-  <img src="https://img.shields.io/badge/Django-4.1-green?logo=django" alt="Django"/>
-  <img src="https://img.shields.io/badge/Phaser-3.54-orange" alt="Phaser"/>
-  <img src="https://img.shields.io/badge/MediaPipe-Pose-red?logo=google" alt="MediaPipe"/>
+  <img src="https://img.shields.io/badge/Python-3.10--3.13-blue?logo=python" alt="Python"/>
+  <img src="https://img.shields.io/badge/Django-5.2_LTS-green?logo=django" alt="Django"/>
+  <img src="https://img.shields.io/badge/Phaser-3.90-orange" alt="Phaser"/>
+  <img src="https://img.shields.io/badge/MediaPipe-Tasks_Vision-red?logo=google" alt="MediaPipe"/>
   <img src="https://img.shields.io/badge/version-1.0.0-brightgreen" alt="Version"/>
 </p>
 
@@ -47,13 +47,14 @@ Built with love by two students who wanted to make fitness less boring. 💪
 |-------|-----------|
 | **Backend** | Django 5.2 LTS, Python 3.10+ |
 | **Auth** | django-allauth 65 (email-based) |
-| **Game Engine** | Phaser 3.54 |
-| **Pose Detection** | MediaPipe (Google ML) |
-| **Charts** | Chart.js 3.7 |
-| **Frontend** | Bootstrap 5.2, vanilla JS |
+| **Game Engine** | Phaser 3.90 |
+| **Pose Detection** | MediaPipe Tasks Vision 0.10.35 (Pose Landmarker) |
+| **Charts** | Chart.js 4.5 |
+| **Frontend** | Bootstrap 5.3, vanilla JS modules |
 | **Database** | SQLite (dev) / PostgreSQL (prod) |
 | **Static Files** | WhiteNoise |
-| **Production** | Gunicorn |
+| **Python tooling** | uv + locked dependencies |
+| **Production** | Gunicorn over HTTPS |
 
 ---
 
@@ -61,7 +62,7 @@ Built with love by two students who wanted to make fitness less boring. 💪
 
 ### Prerequisites
 
-- Python 3.10–3.13 (Django 5.2 LTS supports this range)
+- [uv](https://docs.astral.sh/uv/getting-started/installation/)
 - A webcam (for exercise tracking)
 
 ### Installation
@@ -71,22 +72,17 @@ Built with love by two students who wanted to make fitness less boring. 💪
 git clone https://github.com/omtanakorn/buddyfit-v1testall.git
 cd buddyfit-v1testall
 
-# 2. Create and activate a virtual environment
-python -m venv .venv
-source .venv/bin/activate        # macOS/Linux
-# .venv\Scripts\Activate.ps1     # Windows
+# 2. Install the locked Python version and dependencies
+uv sync
 
-# 3. Install dependencies
-pip install -r requirements.txt
+# 3. Apply database migrations
+uv run python manage.py migrate
 
-# 4. Apply database migrations
-python manage.py migrate
+# 4. Create an admin account
+uv run python manage.py createsuperuser
 
-# 5. Create an admin account
-python manage.py createsuperuser
-
-# 6. Run the development server
-python manage.py runserver
+# 5. Run the development server
+uv run python manage.py runserver
 ```
 
 Open your browser at **http://127.0.0.1:8000** and create your first buddy!
@@ -94,8 +90,8 @@ Open your browser at **http://127.0.0.1:8000** and create your first buddy!
 ### Running the tests
 
 ```bash
-python manage.py test              # everything
-python manage.py test pages        # a single app
+uv run python manage.py test              # everything
+uv run python manage.py test pages        # a single app
 ```
 
 ### Configuration
@@ -119,7 +115,7 @@ settings read these environment variables:
 
 ```bash
 # Before serving with DJANGO_DEBUG=0
-python manage.py collectstatic
+uv run python manage.py collectstatic
 ```
 
 ---
@@ -144,7 +140,8 @@ buddyfit-v1testall/
 ├── templates/         # HTML templates
 ├── static/            # JS game scripts, CSS, images, MediaPipe detectors
 ├── manage.py
-└── requirements.txt
+├── pyproject.toml      # Direct Python dependencies and project metadata
+└── uv.lock             # Fully resolved, reproducible dependency lock
 ```
 
 ---

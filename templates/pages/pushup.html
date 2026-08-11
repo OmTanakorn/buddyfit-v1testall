@@ -13,9 +13,9 @@
 <div class="HQ_container">
   
   <div class="game-container" >
-    <script src="https://cdn.jsdelivr.net/npm/phaser@3.54.0/dist/phaser.min.js"></script>
-    <div id="game-container" ></div>
-    <script src="{% static 'js/gamePush.js'%}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
+    <div id="game-container" data-background-url="{% static 'images/BG.png' %}" data-player-url="{% static 'images/Minotor.png' %}"></div>
+    <script type="module" src="{% static 'js/gamePush.js' %}"></script>
   </div>
 
   <div id="popup" class="popup">
@@ -29,10 +29,6 @@
   </div>
 
   <div class= "Mediapipe-container">
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.1/camera_utils.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils@0.1/control_utils.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.2/drawing_utils.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.2/pose.js" crossorigin="anonymous"></script>
     <script type="text/javascript">
       function showPopup() {
         // Show the popup
@@ -58,35 +54,19 @@
     <button class="change-btn" onclick="showPopup()"><h1>Change</h1></button>
 
     {% comment %} สำหรับบันทึกค่า {% endcomment %}
-    <form action="/update_pushup" method="post">
+    <form action="{% url 'pages:update_pushup' %}" method="post" data-workout-form data-exercise="pushup">
       {% csrf_token %}
-      <input type="hidden"  name="pushup_count" id="CountPushup">
+      <input type="hidden" name="pushup_count" id="CountPushup" value="0">
       <button class="save-btn"><h1>Done</h1></button>
     </form>
     
-    <video class="input_video" width="0px" height="0px" style="visibility: hidden"></video>            
+    <video class="input_video" width="0px" height="0px" style="visibility: hidden" muted playsinline></video>
     
     <div class="loading">
       <div class="spinner"></div>
     </div>
-    <div style="visibility: hidden" class="control"></div>
-    <script src="../static/js/PushUp.js"></script>
-   
-    <script >
-
-      document.getElementById("CountPushup").value = 0;
-      // สร้างฟังก์ชัน updateCountdown ในไฟล์ pushup.html เพื่อแสดงค่า countdown ในตัวแปร pushupCountdown
-      function updateCountdown() {
-        //const countdownDiv = document.getElementById('countdown');
-        const countdown = window.getPushupCountdown();
-        if (countdown === 10) {
-          //countdownDiv.innerText = 'PASS';
-          document.getElementById("CountPushup").value = sessionStorage.getItem("pushup_count");
-          setInterval(updateCountdown, 0);
-        }
-      }
-      setInterval(updateCountdown, 500);
-    </script>
+    <script type="module" src="{% static 'js/PushUp.js' %}"></script>
+    <script type="module" src="{% static 'js/workoutForm.js' %}"></script>
 
   </div>
 {% endblock content %}

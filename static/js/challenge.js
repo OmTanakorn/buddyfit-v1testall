@@ -1,191 +1,67 @@
-// ประกาศไว้บนสุดก่อนเรียกอะไรที่พึ่ง CDN (mediapipe/control_utils)
-// ถ้า CDN ล่ม ไฟล์นี้จะ throw กลางทาง แต่ stage ต้องมีค่าแล้ว ไม่งั้น gamec.update() พังทุกเฟรม
-// ใช้ var เพื่อให้ผูกกับ window ให้ scene อ่านได้แม้ไฟล์นี้ตายทีหลัง
-var nose_y = 0.5
-var right_index_x = 0.5
-var stage = 0
-var count = 0
+import {startPoseDetector} from "./pose/detector.js";
 
-var atk = 0
-var astats = 0
-var cLatk = 0
+const JUMP_THRESHOLD = 0.4;
+const CROUCH_THRESHOLD = 0.8;
 
-const video = document.getElementsByClassName('input_video')[0]
-const out = document.getElementsByClassName('output')[0]
-const controlsElement = document.getElementsByClassName('control')[0]
-const canvasCtx = out.getContext('2d')
+let stage = 0;
 
-const fpsControl = new FPS()
+function drawPoseZones() {
+  const canvas = document.querySelector("canvas.output");
+  const context = canvas.getContext("2d");
+  const jumpY = canvas.height * JUMP_THRESHOLD;
+  const crouchY = canvas.height * CROUCH_THRESHOLD;
 
-const spinner = document.querySelector('.loading')
-spinner.ontransitionend = () => {
-    spinner.style.display = 'none'
+  context.save();
+
+  // ระบายสีบาง ๆ เพื่อให้เห็นพื้นที่ของแต่ละท่าชัดโดยไม่บังภาพกล้อง
+  context.fillStyle = "rgba(36, 255, 126, 0.10)";
+  context.fillRect(0, 0, canvas.width, jumpY);
+  context.fillStyle = "rgba(255, 196, 61, 0.08)";
+  context.fillRect(0, jumpY, canvas.width, crouchY - jumpY);
+  context.fillStyle = "rgba(255, 91, 91, 0.10)";
+  context.fillRect(0, crouchY, canvas.width, canvas.height - crouchY);
+
+  context.setLineDash([12, 8]);
+  context.lineWidth = 3;
+  context.font = "bold 18px sans-serif";
+  context.textBaseline = "bottom";
+  context.shadowColor = "rgba(0, 0, 0, 0.8)";
+  context.shadowBlur = 4;
+
+  context.strokeStyle = "#24ff7e";
+  context.fillStyle = "#24ff7e";
+  context.beginPath();
+  context.moveTo(0, jumpY);
+  context.lineTo(canvas.width, jumpY);
+  context.stroke();
+  context.fillText("กระโดด ↑  จมูกเหนือเส้น", 12, jumpY - 6);
+
+  context.strokeStyle = "#ff5b5b";
+  context.fillStyle = "#ff5b5b";
+  context.beginPath();
+  context.moveTo(0, crouchY);
+  context.lineTo(canvas.width, crouchY);
+  context.stroke();
+  context.fillText("ย่อ ↓  จมูกใต้เส้น", 12, crouchY - 6);
+
+  context.setLineDash([]);
+  context.fillStyle = "#ffd75e";
+  context.textAlign = "right";
+  context.fillText("วิ่งปกติ", canvas.width - 12, (jumpY + crouchY) / 2);
+  context.restore();
 }
 
-function zColor(data) {
-    const z = clamp(data.from.z + 0.5, 0, 1)
-    return `rgba(0, ${255 * z}, ${255 * (1 - z)}, 1)`
-}
+startPoseDetector({
+  onLandmarks(landmarks) {
+    drawPoseZones();
+    if (!landmarks) return;
 
-function drawLineOnCanvas(canvasCtx, startX, startY, endX, endY, color) {
-    canvasCtx.beginPath();
-    canvasCtx.moveTo(startX, startY);
-    canvasCtx.lineTo(endX, endY);
-    canvasCtx.strokeStyle = color; // สีของเส้น
-    canvasCtx.lineWidth = 2; // ความหนาของเส้น
-    canvasCtx.stroke();
-    canvasCtx.closePath();
-}
-
-function onResultsPose(results) {
-    document.body.classList.add('loaded')
-    fpsControl.tick()
-
-    // ถ้าไม่เจอคนในเฟรม poseLandmarks จะเป็น undefined -> ข้ามเฟรมนี้ ไม่งั้น throw แล้ว stage ค้าง
-    if (!results.poseLandmarks) {
-        canvasCtx.clearRect(0, 0, out.width, out.height)
-        canvasCtx.drawImage(results.image, 0, 0, out.width, out.height)
-        return count
-    }
-
-    canvasCtx.save()
-    canvasCtx.clearRect(0, 0, out.width, out.height)
-    canvasCtx.drawImage(results.image, 0, 0, out.width, out.height)
-
-    drawConnectors(
-        canvasCtx, results.poseLandmarks, POSE_CONNECTIONS, {
-        color: (data) => {
-            const x0 = out.width * data.from.x
-            const y0 = out.height * data.from.y
-            const x1 = out.width * data.to.x
-            const y1 = out.height * data.to.y
-
-            const z0 = clamp(data.from.z + 0.5, 0, 1)
-            const z1 = clamp(data.to.z + 0.5, 0, 1)
-
-            const gradient = canvasCtx.createLinearGradient(x0, y0, x1, y1)
-            gradient.addColorStop(
-                0, `rgba(0, ${255 * z0}, ${255 * (1 - z0)}, 1)`)
-            gradient.addColorStop(
-                1.0, `rgba(0, ${255 * z1}, ${255 * (1 - z1)}, 1)`)
-            return gradient
-                }
-            }
-        )
-    drawLandmarks(
-        canvasCtx,
-        Object.values(POSE_LANDMARKS_RIGHT)
-            .map(index => results.poseLandmarks[index]),
-        {color: zColor, fillColor: '#FF0000'})
-        // console.log(Object.values(POSE_LANDMARKS_RIGHT))
-    drawLandmarks(
-        canvasCtx,
-        Object.values(POSE_LANDMARKS_LEFT)
-            .map(index => results.poseLandmarks[index]),
-        {color: zColor, fillColor: '#00FF00'})
-        // console.log(Object.values(POSE_LANDMARKS_LEFT))
-    drawLandmarks(
-        canvasCtx,
-        Object.values(POSE_LANDMARKS_NEUTRAL)
-            .map(index => results.poseLandmarks[index]),
-        {color: zColor, fillColor: '#AAAAAA'})
-        // console.log(Object.values(POSE_LANDMARKS_NEUTRAL))
-    const landmarksLeft = Object.values(POSE_LANDMARKS_RIGHT)
-        .map(index => results.poseLandmarks[index])
-    const landmarksRight = Object.values(POSE_LANDMARKS_LEFT)
-        .map(index => results.poseLandmarks[index])
-        
-    rightarm = landmarksLeft[9].x
-    leftarm = landmarksRight[9].x
-
-    if (rightarm < 0.2 && atk != 1 ) {
-        atk = 1
-        console.log("Yap")
-    }
-    
-    if (rightarm > 0.5) {
-        
-    }
-    
-    if (leftarm < 0.2 && atk == 1) {
-        astats = 1
-        atk = 0
-        console.log("Pow")
-    }
-    
-    if (leftarm > 0.5) {
-
-    }
-
-    
-
-    const nose = Object.values(POSE_LANDMARKS_NEUTRAL)
-        .map(index => results.poseLandmarks[index])
-    nose_y = nose[0].y
-    
-    if(nose_y >= 0.8) {
-        stage = 1
-    }
-    if(nose_y > 0.4&& nose_y <0.8 ) {
-        stage = 0
-    }
-    if(nose_y <=0.4 ){
-        stage = -1
-    }
-    // console.log(stage)
-    drawLineOnCanvas(canvasCtx, 50, 100, 50, 300, 'blue'); // สร้างเส้นด้านซ้าย (จาก (10, 10) ไป (10, 90))
-
-    
-    canvasCtx.font = "30px Arial"
-    canvasCtx.fillStyle = "red"
-    canvasCtx.restore()
-
-    return count
-}
-
-const pose = new Pose({
-    locateFile: (file) => {
-        return `https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.2/${file}`
-    }
-})
-pose.onResults(onResultsPose)
-
-const camera = new Camera(video, {
-    onFrame: async () => {
-        await pose.send({image: video})
-    },
-    width: 480,
-    height: 480
-})
-camera.start()
-
-new ControlPanel(controlsElement, {
-    selfieMode: true,
-    upperBodyOnly: false,
-    smoothLandmarks: true,
-    minDetectionConfidence: 0.5,
-    minTrackingConfidence: 0.5
-})
-.add([
-    new StaticText({title: 'MediaPipe Pose'}),
-    fpsControl,
-    // new Toggle({title: 'Selfie Mode', field: 'selfieMode'}),
-    // new Toggle({title: 'Upper-body Only', field: 'upperBodyOnly'}),
-    // new Toggle({title: 'Smooth Landmarks', field: 'smoothLandmarks'}),
-    // new Slider({
-    //     title: 'Min Detection Confidence',
-    //     field: 'minDetectionConfidence',
-    //     range: [0, 1],
-    //     step: 0.01
-    // }),
-    // new Slider({
-    //     title: 'Min Tracking Confidence',
-    //     field: 'minTrackingConfidence',
-    //     range: [0, 1],
-    //     step: 0.01
-    // }),
-])
-.on(options => {
-    video.classList.toggle('selfie', options.selfieMode)
-    pose.setOptions(options)
-})
+    const noseY = landmarks[0].y;
+    const nextStage =
+      noseY >= CROUCH_THRESHOLD ? 1 : noseY <= JUMP_THRESHOLD ? -1 : 0;
+    stage = nextStage;
+    window.dispatchEvent(
+      new CustomEvent("buddyfit:pose-state", {detail: {stage}}),
+    );
+  },
+});

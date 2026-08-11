@@ -1,15 +1,13 @@
 from datetime import date
-from django.contrib.auth import login, authenticate
 import json
-from django.db.models import Window
-from django.db.models.functions import DenseRank
-from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from accounts.models import Buddy,ExHistory
-from django.db.models.functions import DenseRank
 from accounts.forms import BuddyForm
 from django.core.serializers.json import DjangoJSONEncoder
+
+
+MAX_SUBMISSION_COUNT = 1000
 
 
 @login_required
@@ -99,23 +97,33 @@ def challenge(request):
 
 @login_required
 def create_buddy(request):
+    # ทุกหน้าในระบบออกแบบให้ผู้ใช้มี Buddy ได้เพียงตัวเดียว
+    if Buddy.objects.filter(owner=request.user).exists():
+        return redirect('/')
+
     if request.method == 'POST':
         form = BuddyForm(request.POST)
         if form.is_valid():
-            buddy = form.save(commit=False)
-            buddy.owner = request.user
-            buddy.save()
+            # get_or_create ช่วยปิด race ระหว่าง POST ซ้ำสอง request
+            Buddy.objects.get_or_create(
+                owner=request.user,
+                defaults={
+                    "name": form.cleaned_data["name"],
+                    "skinname": form.cleaned_data["skinname"],
+                },
+            )
             return redirect('/')
     else:
         form = BuddyForm()
     return render(request, 'pages/create.html', {'form': form, 'buddy': None})
 
 def _parse_count(raw):
-    """แปลงค่า count จากฟอร์ม ถ้าว่าง/พัง ให้เป็น 0 แทนที่จะ 500"""
+    """แปลงค่า count จากฟอร์มและจำกัดให้อยู่ในช่วงที่ server ยอมรับ"""
     try:
-        return int(float(raw or 0))
-    except (TypeError, ValueError):
+        count = int(float(raw or 0))
+    except (OverflowError, TypeError, ValueError):
         return 0
+    return min(max(count, 0), MAX_SUBMISSION_COUNT)
 
 
 @login_required
@@ -185,5 +193,3 @@ def update_score(request):
             buddy.highScore = score
             buddy.save()
     return redirect('/')
-
-

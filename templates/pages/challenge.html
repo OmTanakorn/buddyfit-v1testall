@@ -9,7 +9,7 @@
 <div class="HQ_container">
   
   <div class="game-container" >
-    <script src="https://cdn.jsdelivr.net/npm/phaser@3.54.0/dist/phaser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
     <div id="game-container" ></div>
     <script src="{% static 'js/gameChallenge.js'%}"></script>
     <script src="{% static 'js/gameChallengeStart.js'%}"></script>
@@ -35,63 +35,54 @@
   </div>
 
   <div class= "Mediapipe-container">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.1/camera_utils.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils@0.1/control_utils.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.2/drawing_utils.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.2/pose.js" crossorigin="anonymous"></script>
-
     <canvas class="output" width="400px" height="400px"></canvas>
-    <button class="change-btn" id="doneButton"><h1>Replay</h1></button>
-
-    <script>
-      // sessionStorage คืน null ถ้ายังไม่เคยจบเกม -> ต้องกันไว้ ไม่งั้น POST score="" แล้ว view 500
-      function readScore() {
-        return Math.floor(Number(sessionStorage.getItem("score"))) || 0;
-      }
-
-      $(document).ready(function () {
-        $('#doneButton').click(function () {
-            // อ่านคะแนนตอนกดปุ่ม ไม่ใช่ตอนโหลดหน้า เพราะเกมเพิ่งเขียน sessionStorage ตอนจบเกม
-            var score = readScore();
-            $('#endScore').val(score);
-            var csrftoken = $("[name=csrfmiddlewaretoken]").val(); // รับค่า CSRF Token จากแบบฟอร์ม
-
-            $.ajax({
-                type: "POST",
-                url: "/update_score",
-                data: { score: score },
-                headers: { "X-CSRFToken": csrftoken }, // ใส่ CSRF Token ใน header
-                success: function (response) {
-                    // คุณสามารถทำอะไรก็ได้เมื่อคะแนนอัปเดตเสร็จ (ไม่จำเป็นต้องรีเฟรชหน้าเว็บ)
-                },
-                error: function (error) {
-                    console.log(error);
-                }
-            });
-        });
-    });
-    </script>
+    <button type="button" class="change-btn" id="doneButton"><h1>Replay</h1></button>
     
     {% comment %} สำหรับบันทึกค่า {% endcomment %}
-    <form action="/update_score" method="post" id="doneForm">
+    <form action="{% url 'pages:update_score' %}" method="post" id="doneForm">
       {% csrf_token %}
       <input type="hidden"  name="score" id="endScore" value="0">
       <button class="save-btn"><h1>Done</h1></button>
     </form>
     
-    <video class="input_video" width="0px" height="0px" style="visibility: hidden"></video>            
+    <video class="input_video" width="0px" height="0px" style="visibility: hidden" muted playsinline></video>
     
     <div class="loading">
       <div class="spinner"></div>
     </div>
-    <div style="visibility: hidden" class="control"></div>
-    <script src="{% static 'js/challenge.js' %}"> </script>
+    <script type="module" src="{% static 'js/challenge.js' %}"></script>
 
     <script>
-      // ปุ่ม Done submit ฟอร์มตรง ๆ จึงต้อง sync คะแนนล่าสุดลง hidden input ก่อน submit
-      document.getElementById("doneForm").addEventListener("submit", function () {
-        document.getElementById("endScore").value = readScore();
+      let latestScore = 0;
+      const form = document.getElementById("doneForm");
+      const scoreInput = document.getElementById("endScore");
+
+      window.addEventListener("buddyfit:challenge-complete", function (event) {
+        latestScore = event.detail.score;
+        scoreInput.value = latestScore;
+      });
+
+      form.addEventListener("submit", function () {
+        scoreInput.value = latestScore;
+      });
+
+      document.getElementById("doneButton").addEventListener("click", async function () {
+        scoreInput.value = latestScore;
+        try {
+          const response = await fetch(form.action, {
+            method: "POST",
+            credentials: "same-origin",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+              "X-CSRFToken": form.elements.csrfmiddlewaretoken.value,
+            },
+            body: new URLSearchParams({score: latestScore}),
+          });
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          window.location.reload();
+        } catch (error) {
+          console.error("บันทึกคะแนนไม่สำเร็จ", error);
+        }
       });
     </script>
     

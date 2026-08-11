@@ -1,198 +1,228 @@
 # HANDOFF — BuddyFit revival
 
-เอกสารส่งต่องาน สำหรับคนที่มารับช่วงต่อ
+เอกสารส่งต่องานสำหรับคนที่มารับช่วงต่อ
 อัปเดตล่าสุด: 11 ส.ค. 2026 · branch `fix/challenge-game`
 
 ---
 
-## 1. สถานะตอนนี้
-
-โปรเจกต์ถูกปลุกกลับมาจาก stack ปี 2023 ที่หมดอายุแล้ว **เฟส 0 กับ 1 จบไปแล้ว** ที่เหลือคือเฟส 2–4
+## 1. สถานะปัจจุบัน
 
 | เฟส | เนื้องาน | สถานะ |
 |---|---|---|
-| 0 | เขียน test คลุมพฤติกรรมเดิม | ✅ `782c7987` |
-| 1 | อัพ Django + deps + settings ขับด้วย env | ✅ `e92bf0db` |
-| 2 | ย้าย MediaPipe → Tasks Vision + รื้อ pose/game bridge | ⬜ **งานหลักที่เหลือ** |
-| 3 | Phaser 3.90, Chart.js 4, ตัด jQuery, ลบ vendored phaser.js | ⬜ |
-| 4 | deploy จริง (ต้องเป็น HTTPS) | ⬜ |
+| 0 | เขียน test คลุมพฤติกรรมเดิม | ✅ |
+| 1 | อัป Django + dependencies + settings ขับด้วย env | ✅ |
+| 2 | MediaPipe Tasks Vision + pose/game event bridge | ✅ |
+| 3 | Phaser 3.90, Chart.js 4, Bootstrap 5.3, ตัด jQuery | ✅ |
+| 4 | deploy จริงบน HTTPS | ⬜ ต้องมี domain/credentials ของ environment จริง |
 
 ### stack ปัจจุบัน
 
-| | เวอร์ชัน | หมายเหตุ |
+| | เวอร์ชัน |
+|---|---|
+| Python | 3.11 จาก `.python-version` (รองรับ 3.10–3.13) |
+| Package manager | uv + `uv.lock` |
+| Django | 5.2.17 LTS |
+| django-allauth | 65.19 |
+| MediaPipe | `@mediapipe/tasks-vision@0.10.35` + Pose Landmarker Full |
+| Phaser | 3.90.0 |
+| Chart.js | 4.5.1 |
+| Bootstrap | 5.3.8 |
+
+---
+
+## 2. เริ่มใช้งาน
+
+```bash
+uv sync
+uv run python manage.py migrate
+uv run python manage.py createsuperuser
+uv run python manage.py runserver
+```
+
+เปิด `http://127.0.0.1:8000` ได้เลย ค่า dev ทุกตัวมี default แล้ว
+รายการ environment variables อยู่ใน `README.md`
+
+### คำสั่งตรวจงาน
+
+```bash
+uv lock --check
+uv run python manage.py makemigrations --check
+uv run python manage.py test
+
+DJANGO_DEBUG=0 \
+DJANGO_SECRET_KEY=$(uv run python -c 'from django.core.management.utils import get_random_secret_key as g;print(g())') \
+uv run python manage.py check --deploy
+```
+
+ตอนนี้มี **48 tests** และทุกตัวต้องเขียวก่อนส่งงานต่อ
+
+---
+
+## 3. สิ่งที่แก้ในรอบล่าสุด
+
+### ปิด KnownGapTests
+
+- `_parse_count()` จำกัด payload จาก client ให้อยู่ในช่วง 0–1,000 และรับมือ
+  ค่าเสีย, infinity, float และค่าติดลบโดยไม่เกิด 500
+- `Buddy.owner` เปลี่ยนเป็น `OneToOneField` เพื่อบังคับหนึ่ง Buddy ต่อหนึ่ง user
+- migration `0011` รวม power ของ Buddy ที่ซ้ำ, เก็บ high score ที่สูงสุด แล้วจึง
+  บังคับ unique constraint
+- `create_buddy` redirect กลับหน้าแรกทันทีถ้าผู้ใช้มี Buddy อยู่แล้ว
+
+### MediaPipe Tasks Vision
+
+ชั้นกล้องและ detector อยู่ที่ `static/js/pose/detector.js` เพียงไฟล์เดียว:
+
+- `getUserMedia()` + `requestAnimationFrame()`
+- `FilesetResolver` + `PoseLandmarker` ในโหมด `VIDEO`
+- อ่าน landmark จาก `results.landmarks[0]`
+- วาดด้วย `DrawingUtils`
+- ลอง GPU ก่อนและ fallback ไป CPU
+- หยุด camera tracks และปิด landmarker ตอน `pagehide`
+- แสดงข้อความบน canvas เมื่อเปิดกล้องไม่ได้
+
+ไฟล์ `PushUp.js`, `SitUp.js`, `Squat.js`, `challenge.js` เหลือเฉพาะ logic
+แปล landmarks เป็น rep/state จึงสลับ detector ภายหลังได้จากไฟล์กลางไฟล์เดียว
+
+### Pose ↔ game bridge
+
+ไม่มี global state, `sessionStorage`, countdown sentinel หรือ polling แล้ว
+ทุกส่วนคุยกันด้วย `CustomEvent`:
+
+| Event | Producer | Consumer |
 |---|---|---|
-| Python | 3.11 (venv) | Django 5.2 รับ 3.10–3.13 |
-| Django | 5.2.17 LTS | security support ถึง เม.ย. 2028 |
-| django-allauth | 65.19 | |
-| Phaser | 3.54 จาก CDN | **ยังไม่ได้อัพ** (เฟส 3) |
-| MediaPipe | `@mediapipe/pose@0.2` จาก CDN | **ตายแล้ว** publish ล่าสุด ก.พ. 2023 (เฟส 2) |
-| Chart.js | 3.7 | **ยังไม่ได้อัพ** (เฟส 3) |
+| `buddyfit:rep` | pose script ของแต่ละท่า | `trainingGame.js` |
+| `buddyfit:workout-progress` | `trainingGame.js` | `workoutForm.js` |
+| `buddyfit:workout-complete` | `trainingGame.js` | `workoutForm.js` |
+| `buddyfit:pose-state` | `challenge.js` | `gameChallenge.js` |
+| `buddyfit:challenge-complete` | `gameChallenge.js` | form ใน `challenge.html` |
+
+เกมฝึกทั้งสามท่าใช้ `trainingGame.js` ร่วมกันแล้ว ต่างกันเพียง config ของชื่อท่า
+และช่วง animation frames
+
+### Frontend และ tooling
+
+- Phaser 3.90.0, Chart.js 4.5.1 และ Bootstrap 5.3.8 ใช้ URL แบบ pin version
+- ตัด jQuery ออกและใช้ `fetch()` สำหรับบันทึกคะแนนก่อน replay
+- ลบ `static/js/phaser.js` ที่ไม่เคยถูกอ้างถึง (ประมาณ 217,000 บรรทัด)
+- asset URL ของเกมฝึกส่งจาก `{% static %}` ผ่าน `data-*` เพื่อให้ได้ cache busting
+- ย้าย Python dependencies จาก `requirements.txt` ไป `pyproject.toml` + `uv.lock`
+
+### Challenge runner
+
+- ความเร็วเริ่มต้นเพิ่มจาก 200 เป็น 340 px/s และค่อย ๆ เร่งได้ถึง 500 px/s
+- animation วิ่งเพิ่มเป็น 12 FPS และ parallax ใช้ `delta` จึงเร็วเท่ากันทุก refresh rate
+- การแยกท่าใช้ Pose Landmark หมายเลข 0 (จมูก) เฉพาะแกน `y` ซึ่งเป็น normalized
+  coordinate (`0` = ขอบบน, `1` = ขอบล่าง): `nose.y <= 0.4` คือกระโดด,
+  `0.4 < nose.y < 0.8` คือวิ่งปกติ และ `nose.y >= 0.8` คือย่อ
+- ภาพกล้องมีเส้นและสีแบ่งทั้งสามโซน โดยใช้ constants ชุดเดียวกับเงื่อนไขเกม
+  เพื่อไม่ให้ตำแหน่งเส้นกับ action ที่เกิดขึ้นคลาดกัน
+- โดนัทเปลี่ยนจากวัตถุทำดาเมจเป็น collectible ชุดละ 6–8 ชิ้น มีแพตเทิร์น
+  เส้นตรง โค้ง และคลื่น
+- เก็บโดนัทได้ชิ้นละ 10 คะแนน พร้อม counter และเอฟเฟกต์ `+10`
+- platform/gap สร้างต่อเนื่องด้วยระยะที่กระโดดข้ามได้ แทนการสุ่ม spawn ทุก frame
 
 ---
 
-## 2. เริ่มยังไง
+## 4. งานที่เหลือ
+
+### 4.1 Smoke test ด้วยกล้องจริง
+
+Automated tests ตรวจ Django, templates, migrations และ static manifest ได้ แต่ CI
+จำลองท่าทางหน้ากล้องจริงไม่ได้ ก่อน deploy ให้เปิดทั้ง 4 หน้าใน Chrome/Firefox:
+
+1. อนุญาตกล้องและเช็กว่า skeleton แสดงบน canvas
+2. ทดสอบ push-up, sit-up และ squat อย่างน้อยท่าละ 2 reps
+3. เช็กว่าเลขในเกมเพิ่มเฉพาะช่วงจับเวลา และปุ่ม Done บันทึกเลขล่าสุด
+4. ใน challenge ทดสอบยืน/กระโดด/ย่อ และเช็กคะแนนตอนจบกับ Replay/Done
+5. ปิดสิทธิ์กล้องหนึ่งรอบเพื่อเช็กข้อความ error และให้เกมไม่ค้าง
+
+### 4.2 Deploy จริง
 
 ```bash
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-python manage.py migrate
-python manage.py createsuperuser
-python manage.py runserver          # http://127.0.0.1:8000
-```
-
-ไม่ต้องตั้ง env อะไรเลยตอน dev ทุกตัวมีค่าปริยายให้แล้ว รายการ env ทั้งหมดอยู่ในตารางท้าย `README.md`
-
-### คำสั่งที่ใช้ตรวจงาน
-
-```bash
-python manage.py test                                   # ต้องได้ 43 ผ่านหมด
-python manage.py test pages.tests.ScoreUpdateTests      # เจาะเฉพาะคลาส
-
-# จำลอง production ต้องไม่มี issue หลุดมา
-DJANGO_DEBUG=0 DJANGO_SECRET_KEY=$(python -c 'from django.core.management.utils import get_random_secret_key as g;print(g())') \
-  python manage.py check --deploy
-```
-
-**กติกาเดียวของงานนี้: test 43 ตัวต้องเขียวก่อนและหลังทุก commit** ถ้าจะแก้ test ให้แก้เพราะตั้งใจเปลี่ยนพฤติกรรม ไม่ใช่เพราะมันแดง
-
----
-
-## 3. ทำอะไรไปแล้ว (สรุปสั้น)
-
-**เฟส 0** — `accounts/tests.py` กับ `pages/tests.py` เดิมว่างเปล่าทั้งคู่ ตอนนี้มี 43 tests เน้นหนักที่ 4 write endpoints เพราะเป็นจุดที่เคยพัง 500 มาแล้ว (junk payload, anonymous POST, GET, count=0)
-
-**เฟส 1** — อัพเป็นขั้น 4.1 → 4.2 → allauth 65 → 5.2 รัน test ทุกขั้น, settings ย้ายไป env var, ปิด `CORS_ALLOW_ALL_ORIGINS`, `debug_toolbar` โหลดเฉพาะตอน DEBUG, `STATICFILES_STORAGE` → `STORAGES`
-
-เจอบั๊กจริง 2 ตัวและแก้แล้ว: หน้า login/signup ใช้ `{% static './images/...' %}` ซึ่งพัง ValueError ทั้งหน้าตอน `DEBUG=0` และ `ExHistory.exCount = IntegerField(10)` ที่เลข 10 ไปตกเป็น `verbose_name`
-
-อ่านเหตุผลเต็มได้จาก `git show e92bf0db` — commit message เขียนละเอียดไว้แล้ว
-
----
-
-## 4. งานถัดไป เรียงตามลำดับที่ควรทำ
-
-### 4.1 งานอุ่นเครื่อง — ปิด KnownGapTests (ประมาณครึ่งวัน)
-
-`pages/tests.py` มีคลาส `KnownGapTests` ที่ **ล็อกบั๊กที่ยังไม่แก้ไว้ 2 ตัว** จงใจให้มันเขียวกับพฤติกรรมผิด ๆ เพื่อให้เห็นชัดว่ายังไม่ได้แก้ พอแก้แล้วต้องเขียน test พวกนี้ใหม่
-
-1. **ค่าติดลบดูดพลังลง** — client POST `pushup_count=-50` ได้ตรง ๆ `_parse_count()` ที่ `pages/views.py` ไม่กันค่าติดลบ แก้ที่ `_parse_count` ให้ clamp ขั้นต่ำเป็น 0 (และควรมี upper bound ด้วย ไม่งั้นยิง 999999 ขึ้นอันดับ 1 บน leaderboard ได้เลย)
-2. **buddy ตัวที่สองทำให้ทุก write endpoint พัง** — `create_buddy` ไม่กันการสร้างซ้ำ แต่ `update_*` ใช้ `get_object_or_404(Buddy, owner=...)` ซึ่งโยน `MultipleObjectsReturned` = 500 เลือกทางใดทางหนึ่งแล้วทำให้สุด: กันไม่ให้สร้างตัวที่สอง หรือรองรับหลาย buddy จริง ๆ (ต้องแก้ทั้ง view, template, และ URL ให้ระบุ buddy id)
-
-ทำข้อนี้ก่อนเพราะได้ทำความรู้จักโค้ดฝั่ง Django โดยไม่ต้องแตะ pose
-
----
-
-### 4.2 เฟส 2 — ย้าย MediaPipe (งานหลัก)
-
-**ปัญหา**: `@mediapipe/pose` เป็น Legacy Solutions ที่ Google หยุด maintain ตั้งแต่ ก.พ. 2023 ทั้งหน้าโหลดจาก CDN ถ้าวันไหน jsDelivr เอาลง แอปตายทันที
-
-**ข่าวดี**: ตัวใหม่ (`@mediapipe/tasks-vision`, `PoseLandmarker`) ใช้โมเดล BlazePose ตัวเดิม landmark 33 จุด index เดิมเป๊ะ (nose = 0, right_index = 20) **logic นับ rep ไม่ต้องเขียนใหม่** ที่ต้องเขียนใหม่คือชั้น glue เท่านั้น
-
-#### ตารางแปลง API
-
-| ของเดิม | ของใหม่ |
-|---|---|
-| `new Pose({locateFile})` + `pose.onResults(cb)` | `FilesetResolver.forVisionTasks()` → `PoseLandmarker.createFromOptions({runningMode:'VIDEO', delegate:'GPU'})` |
-| `new Camera(video, {onFrame})` จาก `camera_utils` | `getUserMedia()` + `requestAnimationFrame` → `detectForVideo(video, timestamp)` |
-| `results.poseLandmarks[i]` | `results.landmarks[0][i]` ← **shape เปลี่ยน ระวังตรงนี้ที่สุด** |
-| `drawConnectors` / `drawLandmarks` จาก `drawing_utils` | `DrawingUtils` ที่มากับ `tasks-vision` |
-| `new FPS()` จาก `control_utils` | เขียนเอง 5 บรรทัด ไม่ต้องพึ่ง lib |
-
-#### ไฟล์ที่ต้องแตะ
-
-| ไฟล์ | จุดที่เกี่ยวข้อง |
-|---|---|
-| `static/js/PushUp.js` | `onResultsPose` (บรรทัด 24), `new Pose` (96), `new Camera` (103) |
-| `static/js/SitUp.js` | `onResultsPose` (36), `new Pose` (111), `new Camera` (119) |
-| `static/js/Squat.js` | โครงเดียวกับ SitUp.js |
-| `static/js/challenge.js` | เหมือนกัน แต่มี guard เพิ่มจากรอบแก้บั๊กที่แล้ว ใช้เป็นตัวอย่างได้ |
-| `templates/pages/{pushup,situp,squat,challenge}.html` | `<script>` tag ของ MediaPipe ทั้ง 4 ตัว |
-
-**สำคัญ**: 4 ไฟล์ pose นี้ copy-paste logic เดียวกันคนละก๊อป **อย่าย้ายทีละไฟล์ให้ครบ 4 รอบ** ให้แยก pose layer ออกเป็น module กลางก่อน (เช่น `static/js/pose/detector.js`) แล้วให้ทั้ง 4 หน้าเรียกใช้ร่วมกัน ไม่งั้นได้ของซ้ำ 4 ก๊อปแบบเดิมแต่เวอร์ชันใหม่
-
-#### รื้อ bridge ไปพร้อมกัน (จุดสำคัญกว่าการอัพเวอร์ชัน)
-
-ตอนนี้ pose script กับ Phaser scene คุยกันผ่าน **global variable + `sessionStorage` + `setInterval` polling** ซึ่งเปราะมากและเป็นต้นตอของบั๊กเกมค้างรอบที่แล้วทั้งดุ้น (ดู `git show 705264e1`)
-
-flow ปัจจุบัน:
-```
-MediaPipe onResultsPose  →  เขียน global (stage, count, nose_y)
-                         →  Phaser update() อ่าน global ทุกเฟรม
-                         →  scene เขียน sessionStorage
-                         →  inline JS ใน template poll ทุก 500ms เช็ค sentinel countdown === 10
-                         →  copy ค่าลง hidden input
-                         →  form POST
-```
-
-เปลี่ยนเป็น ES module + `CustomEvent` หรือ store object ตัวเดียว ตัด `setInterval` polling กับ sentinel `countdown = 10` ทิ้ง (sentinel อยู่ที่ `static/js/gamePush.js:114`, ตัว poll อยู่ใน `templates/pages/pushup.html`)
-
-#### ถ้าเจอปัญหา FPS
-
-MediaPipe BlazePose บน browser ได้ราว 11–12 FPS ส่วน MoveNet Lightning (TFJS `pose-detection`) ได้ 34+ FPS แต่มี 17 จุด COCO เท่านั้น — ซึ่ง**พอสำหรับโปรเจกต์นี้** เพราะใช้แค่ nose/wrist/hip/knee ถ้าแยก pose layer ไว้ดีตามข้อบน การสลับ detector จะเป็นงานแก้ไฟล์เดียว
-
----
-
-### 4.3 เฟส 3 — Frontend
-
-- Phaser 3.54 → **3.90** เท่านั้น **อย่าไป 4.x** (ออก เม.ย. 2026, breaking เยอะ เขียนใหม่ ไม่คุ้ม)
-- **ลบ `static/js/phaser.js` ทิ้ง** — vendored bundle 217k บรรทัด แต่ทุกหน้าโหลด Phaser จาก CDN อยู่แล้ว ไม่มีไฟล์ไหนอ้างถึงมันเลย
-- Chart.js 3.7 → 4.5 (แก้ที่ `templates/pages/ex_history.html`)
-- ตัด jQuery ทิ้ง ใช้ที่ `templates/pages/challenge.html` ที่เดียว เปลี่ยนเป็น `fetch()`
-- Bootstrap 5.2.3 → 5.3
-- path `../static/images/...` ที่ hardcode ใน JS string ควรเปลี่ยนไปส่งผ่าน `{% static %}` เป็น data-attribute — **แต่นี่เป็น optimization ไม่ใช่ของพัง** `collectstatic` เก็บสำเนาชื่อเดิมไว้คู่กับชื่อ hash อยู่แล้ว สิ่งที่เสียคือ cache-busting เท่านั้น จัดลำดับความสำคัญให้ถูก
-
----
-
-### 4.4 เฟส 4 — Deploy
-
-settings พร้อมแล้วจากเฟส 1 ตั้ง env แล้วขึ้นได้เลย
-
-```bash
-DJANGO_DEBUG=0
-DJANGO_SECRET_KEY=<สุ่มมา ห้ามใช้ค่าใน repo>
-DJANGO_ALLOWED_HOSTS=buddyfit.example.com
-DJANGO_CSRF_TRUSTED_ORIGINS=https://buddyfit.example.com
-DATABASE_URL=postgres://user:pass@host:5432/dbname
+export DJANGO_DEBUG=0
+export DJANGO_SECRET_KEY=<สุ่มใหม่ ห้ามใช้ค่าใน repo>
+export DJANGO_ALLOWED_HOSTS=buddyfit.example.com
+export DJANGO_CSRF_TRUSTED_ORIGINS=https://buddyfit.example.com
+export DATABASE_URL=postgres://user:pass@host:5432/dbname
 ```
 
 ```bash
-python manage.py collectstatic     # ต้องรันก่อนเสมอเมื่อ DEBUG=0
-gunicorn buddyfit.wsgi
+uv sync --locked --no-dev
+uv run --locked --no-dev python manage.py migrate
+uv run --locked --no-dev python manage.py collectstatic --noinput
+uv run --locked --no-dev gunicorn buddyfit.wsgi
 ```
 
-⚠️ **ต้องเป็น HTTPS เท่านั้น** เบราว์เซอร์ให้สิทธิ์ `getUserMedia` เฉพาะ secure origin ถ้า deploy เป็น HTTP กล้องจะไม่ขึ้น หน้า training ใช้ไม่ได้ทั้งหมด (`localhost` เป็นข้อยกเว้นเดียว จึงเทสต์บนเครื่องได้)
+ต้องวางหลัง HTTPS เท่านั้น เพราะ browser อนุญาต `getUserMedia` เฉพาะ secure origin
+(`localhost` เป็นข้อยกเว้นสำหรับ dev)
+
+### 4.3 แนวทาง Pose Classification (ยังไม่ได้ implement)
+
+เป้าหมายระยะถัดไปคือแยกกิจกรรม `standing`, `squat` และ `jump` จาก Pose Landmarks
+ปัจจุบัน challenge ดูเฉพาะ `nose.y` จึงเป็น screen-position control ไม่ใช่ exercise
+classifier ที่เข้าใจท่าทางจริง
+
+แนวทางที่เหมาะกับ POC คือ **Hybrid Temporal Pose Classifier**:
+
+```text
+camera -> MediaPipe 33 landmarks -> normalized features/angles
+       -> buffer 15-30 frames -> state machine -> action + confidence
+```
+
+- ใช้หัวไหล่ สะโพก เข่า ข้อเท้า ส้นเท้า และปลายเท้าแทนการดูจมูกจุดเดียว
+- features หลักคือมุมเข่า/สะโพก, ความเอียงลำตัว, ตำแหน่งกึ่งกลางสะโพก,
+  vertical velocity และตำแหน่งเท้าเทียบ floor baseline จาก calibration
+- state ภายในควรมี `STANDING`, `DESCENDING`, `SQUAT_HOLD`, `RISING`,
+  `TAKEOFF`, `AIRBORNE`, `LANDING`, `UNKNOWN` แล้วค่อย map เป็นชื่อ action
+- ใช้ hysteresis/EMA และให้เงื่อนไขคงอยู่ 3-5 เฟรมก่อนเปลี่ยน state
+- squat คือเข่า/สะโพกงอแล้วกลับขึ้นโดยเท้ายังอยู่บนพื้น ส่วน jump ต้องเห็น sequence
+  ย่อ -> เคลื่อนขึ้น -> เท้าทั้งสองพ้น baseline -> ลงพื้น จึงห้ามตัดสิน jump จากเฟรมเดียว
+- ควรส่ง `result.worldLandmarks[0]` ออกจาก `pose/detector.js` เพิ่มในอนาคตเพื่อช่วย
+  คำนวณมุม 3D แต่ห้ามใช้ world Y วัดความสูงกระโดดโดยตรง เพราะ origin อยู่กลางสะโพก
+
+ตัวเลือกที่สำรวจไว้:
+
+1. [Google ML Kit Pose Classifier](https://github.com/googlesamples/mlkit/blob/master/android/vision-quickstart/app/src/main/java/com/google/mlkit/vision/demo/java/posedetector/classification/PoseClassifierProcessor.java)
+   เป็น k-NN sample พร้อม `squats_down`, `pushups_down`, EMA และ rep counter;
+   ใกล้โจทย์ที่สุดแต่เป็น Android/Java และไม่มี jump
+2. [TensorFlow MoveNet Pose Classification](https://blog.tensorflow.org/2021/08/pose-estimation-and-classification-on-edge-devices-with-MoveNet-and-TensorFlow-Lite.html)
+   เป็นต้นแบบ keypoints -> normalize -> small classifier (ประมาณ 30 KB) แต่ใช้ 17 จุด
+   และต้องฝึกคลาสของเราเอง
+3. [NVIDIA TAO PoseClassificationNet](https://docs.nvidia.com/tao/tao-toolkit/latest/text/cv_finetuning/pytorch/pose_classification/pose_classification.html)
+   เป็น ST-GCN หลายเฟรม มีตัวอย่างคลาส `standing`/`jumping` แต่ใช้ skeleton 34 จุด,
+   sequence สูงสุด 300 เฟรม และเหมาะกับ ONNX/TensorRT/Jetson มากกว่า browser
+4. [OpenMMLab MMAction2 ST-GCN](https://github.com/open-mmlab/mmaction2/blob/main/configs/skeleton/stgcn/README.md)
+   มี pretrained checkpoints บน NTU60/NTU120 แต่ topology/labels ไม่ตรง MediaPipe
+   จึงต้องแปลง landmarks และ fine-tune
+
+ลำดับที่แนะนำ: พอร์ตแนวคิด k-NN ของ Google มาทดลอง standing/squat ก่อน, ใช้ temporal
+state machine สำหรับ jump และเก็บคลิปที่ติด label; เมื่อจำนวนท่าเพิ่มจึงค่อย fine-tune
+temporal model เช่น ST-GCN โดยต้อง split validation ตามผู้ใช้ ไม่ใช่สุ่มเฟรมจากคนเดียวกัน
 
 ---
 
-## 5. กับดักที่ต้องรู้ก่อนแตะโค้ด
+## 5. ข้อควรรู้
 
-อ่านข้อนี้ให้จบก่อนเริ่ม ทุกข้อเคยทำให้เสียเวลามาแล้ว
-
-1. **ลำดับ `<script>` ในเทมเพลตมีผลต่อการทำงาน** pose script กับ game script แชร์ scope กัน (ไม่มี module ไม่มี bundler) ตัวแปรที่ scene อ่านใน `update()` ต้องประกาศด้วย `var` ไว้บนสุดของไฟล์ pose **ก่อน**บรรทัดที่เรียกของจาก CDN (`FPS()`, `Pose()`) เพราะถ้า CDN ล่ม ไฟล์จะตายกลางทางแต่ตัวแปรที่ประกาศไว้ก่อนหน้ายังอยู่
-
-   `challenge.js` แก้ตรงนี้ไปแล้ว **แต่ `PushUp.js:14-17`, `SitUp.js:15-17`, `Squat.js:14-16` ยังใช้ `let` อยู่** = บั๊กเกมค้างแบบเดียวกันยังฝังอยู่ในหน้า training ทั้ง 3 หน้า ถ้าเฟส 2 ยังไม่ได้ทำ ตรงนี้แก้ก่อนได้เลย
-
-2. **`onResultsPose` ต้องเช็ค `results.poseLandmarks` ก่อนใช้เสมอ** MediaPipe ส่ง `undefined` มาเมื่อไม่มีคนอยู่ในเฟรม ถ้าไม่เช็คจะ throw ทุกเฟรม แล้ว `stage` ค้าง = กระโดด/สไลด์ไม่ได้ถาวร (ของใหม่คือ `results.landmarks` ที่เป็น array ซ้อน array)
-
-3. **อ่าน `sessionStorage` ตอนกดปุ่ม ไม่ใช่ตอนโหลดหน้า** เกมเพิ่งเขียนค่าตอนจบรอบ อ่านตอนโหลดหน้าจะได้ `null` แล้ว POST ค่าว่างไปที่ server
-
-4. **`static/js/phaser.js` มี 217,000 บรรทัด อย่าเปิด อย่าแก้** ทุกหน้าโหลด Phaser จาก CDN ไฟล์นี้ไม่ถูกใช้
-
-5. **test รันด้วย `DEBUG=False`** ทำให้ WhiteNoise ใช้ manifest storage ซึ่งยังไม่มีถ้าไม่ได้ `collectstatic` `BaseTestCase` ใน `pages/tests.py` เลย override `STORAGES` กลับเป็นตัวธรรมดาไว้ **test class ใหม่ที่ render หน้าเว็บต้องสืบทอดจาก `BaseTestCase`** ไม่ใช่ `TestCase` เปล่า ๆ ไม่งั้นจะเจอ `ValueError: Missing staticfiles manifest entry`
-
-6. **`{% static %}` ห้ามมี `./` นำหน้า** manifest ไม่มี entry ของ `./images/x.png` จะพังเฉพาะตอน `DEBUG=0` เท่านั้น (ตอน dev ไม่เห็นอะไรผิด) นี่คือบั๊กที่ทำให้หน้า login ใช้ไม่ได้บน production มาตลอด
-
-7. **`ExHistory.exData` สะกดผิด** ตั้งใจจะเป็น `exDate` ถ้าจะ rename ต้องแก้ทั้ง model, migration, `pages/views.py`, และ template ทำเป็น commit แยกอย่าปนกับงานอื่น
-
-8. **comment กับข้อความในโค้ดเป็นภาษาไทย** เขียนเพิ่มให้กลมกลืนกับของเดิม ส่วน **commit message กับชื่อตัวแปร/ฟังก์ชันเป็นอังกฤษ**
+1. MediaPipe JS/WASM, pose model, Phaser, Chart.js และ Bootstrap ยังโหลดจาก CDN
+   ภายนอก ถ้าต้องการ deploy แบบไม่พึ่ง third party ให้ vendor ไฟล์เหล่านี้เป็นงานแยก
+2. เพดาน score 1,000 ลด payload เกินจริง แต่ score ยังมาจาก client จึงไม่ใช่ระบบ
+   anti-cheat เต็มรูปแบบ ถ้าต้องการ leaderboard ที่เชื่อถือได้ต้องออกแบบการยืนยัน run
+   ฝั่ง server เพิ่ม
+3. test รันด้วย `DEBUG=False`; test class ที่ render template ต้องสืบทอด
+   `BaseTestCase` เพื่อไม่ให้ WhiteNoise manifest ที่ยังไม่ได้ collect ทำให้ test พัง
+4. `{% static %}` ห้ามมี `./` นำหน้า เพราะ manifest ไม่มี key รูปแบบนั้น
+5. `ExHistory.exData` สะกดผิดจาก `exDate` มาตั้งแต่ schema เดิม ถ้าจะ rename ให้ทำ
+   migration และแก้ view/template เป็นงานแยก
+6. production ต้องรัน `collectstatic` ทุกครั้งก่อน start Gunicorn
 
 ---
 
-## 6. เอกสารอื่นในโปรเจกต์
+## 6. เอกสารหลัก
 
 | ไฟล์ | เนื้อหา |
 |---|---|
-| `CLAUDE.md` | architecture, คำสั่ง, ตาราง pose↔game bridge ต่อหน้า — อ่านก่อนเริ่มเขียนโค้ด |
-| `README.md` | วิธีติดตั้ง, ตาราง env var ทั้งหมด, feature list |
-| `git show 705264e1` | ที่มาของบั๊กเกมค้าง 5 จุด อ่านแล้วจะเข้าใจว่าทำไม bridge ถึงต้องรื้อ |
-| `git show e92bf0db` | เหตุผลของทุกการเปลี่ยนแปลงในเฟส 1 |
+| `CLAUDE.md` | architecture, event bridge, conventions และคำสั่งพัฒนา |
+| `README.md` | setup ด้วย uv, environment variables และ feature overview |
+| `pyproject.toml` | direct dependencies |
+| `uv.lock` | dependency graph ที่ resolve แล้ว |

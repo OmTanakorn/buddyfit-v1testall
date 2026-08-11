@@ -4,7 +4,7 @@
 {% block content %}
 
 <h1>Exercise History</h1>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
 
 <canvas id="pushupChart" width="400" height="200"></canvas>
 <script>
@@ -55,20 +55,20 @@
         },
         options: {
             scales: {
-                x: [{
+                x: {
                     display: true,
                     title: {
                         display: true,
                         text: 'Date'
                     }
-                }],
-                y: [{
+                },
+                y: {
                     display: true,
                     title: {
                         display: true,
                         text: 'Exercise Count'
                     }
-                }]
+                }
             }
         }
     });

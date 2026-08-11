@@ -16,7 +16,7 @@ class Buddy(models.Model):
     legpower = models.IntegerField(default=0)
     bodypower = models.IntegerField(default=0)
     highScore = models.IntegerField(default=0)
-    owner = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
+    owner = models.OneToOneField(get_user_model(), on_delete=models.CASCADE)
     
     def __str__(self):
         return self.name
@@ -28,4 +28,3 @@ class ExHistory(models.Model):
     owner = models.ForeignKey(get_user_model() , on_delete=models.CASCADE)
     def __str__(self):
         return str(self.owner) + " เล่นท่า " +self.exType+ ' จำนวน : ' + str(self.exCount)
-
