@@ -1,32 +1,44 @@
 {% extends '_base.html' %}
 {% load static %}
 
-{% block title %}Create Buddy{% endblock title %}
+{% block title %}สร้าง Buddy · BuddyFit{% endblock title %}
 
 {% block content %}
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">WELCOME TO BUDDYFIT</p>
+    <h1>การเดินทางของคุณกำลังจะเริ่ม</h1>
+    <p>ตั้งชื่อคู่หูที่จะเติบโตจากทุกการเคลื่อนไหวของคุณ</p>
+  </div>
+</section>
 
-<div class="HQ_container">
-  
-  <div class="game-container" >
+<div class="create-layout">
+  <section class="create-preview" aria-label="ตัวอย่าง Buddy">
     <script src="https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js"></script>
-    <div id="game-container" ></div>
-    
-    <script src="{% static 'js/egg_random.js'%}"></script>
-  </div>
+    <div id="game-container"></div>
+    <script src="{% static 'js/egg_random.js' %}"></script>
+  </section>
 
-  {% comment %} STUTS {% endcomment %}
-  <div class="Create-Buddy">
-    <h1>Create a new Buddy</h1>
-    <form method="post">
+  <section class="panel create-card">
+    <div class="step-list" aria-label="ขั้นตอนที่ 1 จาก 3">
+      <span class="step active"></span><span class="step"></span><span class="step"></span>
+    </div>
+    <p class="eyebrow">STEP 1 · MEET YOUR BUDDY</p>
+    <h1>ตั้งชื่อคู่หูของคุณ</h1>
+    <p>ระบบจะสุ่มสายพันธุ์ Buddy ให้หนึ่งตัว เมื่อกดฟักไข่แล้วคุณจะเริ่มสะสมพลังได้ทันที</p>
+
+    <form method="post" class="create-form">
       {% csrf_token %}
-      {{ form.as_p }}
-      <button type="submit">Save</button>
-    </form>
-  </div>
-  <script>
-    const buddyName = '{{ buddy.name }}'
-  </script>
+      {{ form.non_field_errors }}
+      <label for="{{ form.name.id_for_label }}">ชื่อ Buddy</label>
+      {{ form.name.errors }}
+      {{ form.name }}
+      {{ form.skinname }}
+      <span class="helptext">ใช้ชื่อที่มีความหมายกับคุณ แล้วออกกำลังกายไปด้วยกันทุกวัน</span>
 
-    
-  </div>
+      <div class="hatch-note"><span>🥚</span><span>Buddy จะเริ่มจากไข่ และเปลี่ยนรูปร่างตามระดับพลังที่คุณสะสม</span></div>
+      <button type="submit" class="button button-primary button-wide">ฟักไข่และเริ่มการเดินทาง</button>
+    </form>
+  </section>
+</div>
 {% endblock content %}

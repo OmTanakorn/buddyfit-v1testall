@@ -1,18 +1,14 @@
 {% extends '_base.html' %}
-{% load crispy_forms_tags %}
-
-{% block title %}Log out{% endblock %}
-
-
+{% block title %}ออกจากระบบ · BuddyFit{% endblock %}
 {% block content %}
-<h1>Sign Out</h1>
-
-<p>Are you sure you want to sign out?</p>
-
-<form method="post" action="{% url 'account_logout' %}">
-  {% csrf_token %}
-  {{ form|crispy }}
-  <button class="btn btn-danger" type="submit">Sign Out</button>
-</form>
-
+<section class="panel simple-card">
+  <p class="eyebrow">SEE YOU SOON</p>
+  <h1>ต้องการออกจากระบบ?</h1>
+  <p style="color:var(--muted)">พัฒนาการทั้งหมดของคุณถูกบันทึกไว้ แล้วกลับมาฝึกกับ Buddy อีกนะ</p>
+  <form method="post" action="{% url 'account_logout' %}">
+    {% csrf_token %}
+    <button class="button button-danger" type="submit">ออกจากระบบ</button>
+    <a class="button button-ghost" href="/">กลับหน้าหลัก</a>
+  </form>
+</section>
 {% endblock content %}

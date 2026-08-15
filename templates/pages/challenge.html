@@ -1,91 +1,109 @@
 {% extends '_base.html' %}
 {% load static %}
 
-
-{% block title %}Challenge{% endblock title %}
+{% block title %}Challenge · BuddyFit{% endblock title %}
 
 {% block content %}
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">BUDDY CHALLENGE</p>
+    <h1>วิ่ง เก็บโดนัท และทำคะแนนให้สูงที่สุด</h1>
+    <p>ขยับร่างกายจริงเพื่อควบคุม Buddy — ยืนเพื่อวิ่ง กระโดดเพื่อกระโดด และย่อเพื่อสไลด์</p>
+  </div>
+  <a class="button button-ghost" href="/">← กลับหน้าหลัก</a>
+</section>
 
-<div class="HQ_container">
-  
-  <div class="game-container" >
+<div class="challenge-layout">
+  <section class="challenge-game" aria-label="เกม Challenge">
     <script src="https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js"></script>
-    <div id="game-container" ></div>
-    <script src="{% static 'js/gameChallenge.js'%}"></script>
-    <script src="{% static 'js/gameChallengeStart.js'%}"></script>
-    <script src="{% static 'js/gameChallengeEnd.js'%}"></script>
+    <div id="game-container"></div>
+    <script src="{% static 'js/gameChallenge.js' %}"></script>
+    <script src="{% static 'js/gameChallengeStart.js' %}"></script>
+    <script src="{% static 'js/gameChallengeEnd.js' %}"></script>
     <script>
       const config = {
         type: Phaser.AUTO,
-        width: 800, // ปรับความกว้างตามความเหมาะสม
-        height: 600, // ปรับความสูงตามความเหมาะสม
+        width: 800,
+        height: 600,
         parent: 'game-container',
-        physics : {
-          default : "arcade",
-          arcade: {
-            debug: false, // ตั้ง true เพื่อโชว์กรอบ hitbox ตอน debug
-          },
+        physics: {default: 'arcade', arcade: {debug: false}},
+        scene: [gameStart, gamec, gameEnd],
+      };
+      const game = new Phaser.Game(config);
+    </script>
+  </section>
+
+  <aside class="challenge-side">
+    <section class="panel challenge-camera">
+      <div class="camera-header">
+        <div>
+          <strong>Body Controller</strong>
+          <div class="live-status"><span class="status-dot"></span><span>ควบคุมด้วยท่าทาง</span></div>
+        </div>
+        <span class="eyebrow" style="margin:0">LIVE</span>
+      </div>
+      <div class="camera-wrap">
+        <canvas class="output" width="400" height="400"></canvas>
+        <div class="camera-guide" aria-hidden="true"></div>
+        <div class="rep-display"><strong data-challenge-score>0</strong><span>SCORE</span></div>
+        <div class="loading"><div class="spinner"></div></div>
+      </div>
+      <div class="challenge-actions">
+        <button type="button" class="button button-ghost" id="doneButton">เล่นใหม่</button>
+        <form action="{% url 'pages:update_score' %}" method="post" id="doneForm">
+          {% csrf_token %}
+          <input type="hidden" name="score" id="endScore" value="0">
+          <button class="button button-primary button-wide" type="submit">บันทึกคะแนน</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="panel challenge-tip">
+      <h3>วิธีควบคุม</h3>
+      <ul>
+        <li>ยืนกลางเฟรมเพื่อวิ่งต่อเนื่อง</li>
+        <li>กระโดดขึ้นเพื่อข้ามสิ่งกีดขวาง</li>
+        <li>ย่อตัวลงเพื่อสไลด์ลอดด้านล่าง</li>
+      </ul>
+    </section>
+  </aside>
+</div>
+
+<video class="input_video" width="0" height="0" style="position:absolute;visibility:hidden" muted playsinline></video>
+<script type="module" src="{% static 'js/challenge.js' %}"></script>
+<script>
+  let latestScore = 0;
+  const form = document.getElementById('doneForm');
+  const scoreInput = document.getElementById('endScore');
+  const scoreOutput = document.querySelector('[data-challenge-score]');
+
+  window.addEventListener('buddyfit:challenge-complete', function (event) {
+    latestScore = event.detail.score;
+    scoreInput.value = latestScore;
+    scoreOutput.textContent = latestScore;
+  });
+
+  form.addEventListener('submit', function () {
+    scoreInput.value = latestScore;
+  });
+
+  document.getElementById('doneButton').addEventListener('click', async function () {
+    scoreInput.value = latestScore;
+    try {
+      const response = await fetch(form.action, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-CSRFToken': form.elements.csrfmiddlewaretoken.value,
         },
-        scene: [gameStart, gamec, gameEnd] // นำ Scene ที่สร้างขึ้นเข้ามาในเกม
-    };
-    
-    //สร้างเกม
-    const game = new Phaser.Game(config);
-    </script>
-  </div>
-
-  <div class= "Mediapipe-container">
-    <canvas class="output" width="400px" height="400px"></canvas>
-    <button type="button" class="change-btn" id="doneButton"><h1>Replay</h1></button>
-    
-    {% comment %} สำหรับบันทึกค่า {% endcomment %}
-    <form action="{% url 'pages:update_score' %}" method="post" id="doneForm">
-      {% csrf_token %}
-      <input type="hidden"  name="score" id="endScore" value="0">
-      <button class="save-btn"><h1>Done</h1></button>
-    </form>
-    
-    <video class="input_video" width="0px" height="0px" style="visibility: hidden" muted playsinline></video>
-    
-    <div class="loading">
-      <div class="spinner"></div>
-    </div>
-    <script type="module" src="{% static 'js/challenge.js' %}"></script>
-
-    <script>
-      let latestScore = 0;
-      const form = document.getElementById("doneForm");
-      const scoreInput = document.getElementById("endScore");
-
-      window.addEventListener("buddyfit:challenge-complete", function (event) {
-        latestScore = event.detail.score;
-        scoreInput.value = latestScore;
+        body: new URLSearchParams({score: latestScore}),
       });
-
-      form.addEventListener("submit", function () {
-        scoreInput.value = latestScore;
-      });
-
-      document.getElementById("doneButton").addEventListener("click", async function () {
-        scoreInput.value = latestScore;
-        try {
-          const response = await fetch(form.action, {
-            method: "POST",
-            credentials: "same-origin",
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-              "X-CSRFToken": form.elements.csrfmiddlewaretoken.value,
-            },
-            body: new URLSearchParams({score: latestScore}),
-          });
-          if (!response.ok) throw new Error(`HTTP ${response.status}`);
-          window.location.reload();
-        } catch (error) {
-          console.error("บันทึกคะแนนไม่สำเร็จ", error);
-        }
-      });
-    </script>
-    
-
-  </div>
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      window.location.reload();
+    } catch (error) {
+      console.error('บันทึกคะแนนไม่สำเร็จ', error);
+    }
+  });
+</script>
 {% endblock content %}

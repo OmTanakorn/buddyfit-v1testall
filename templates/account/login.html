@@ -1,23 +1,27 @@
 {% extends '_base.html' %}
-{% load crispy_forms_tags %}
-{% load static %}
-
-{% block title %}Log in{% endblock %}
-
+{% load crispy_forms_tags static %}
+{% block title %}เข้าสู่ระบบ · BuddyFit{% endblock %}
 {% block content %}
-<div class="login-container">
-  <div class="login-image">
-    <img src="{% static 'images/BG_LOGO.png' %}" alt="Login Image" style="width: 500px; height: auto;">
-  </div>
-
-  <div class="login-form">
-    <h2>Log in</h2>
+<div class="auth-layout">
+  <section class="auth-visual">
+    <img src="{% static 'images/BG_LOGO.png' %}" alt="BuddyFit gym">
+    <div class="auth-visual-copy">
+      <p class="eyebrow" style="color:var(--green)">TRAIN · GROW · CHALLENGE</p>
+      <h1>แข็งแรงขึ้นไปพร้อมกับ Buddy</h1>
+      <p>เปลี่ยนทุกครั้งที่ออกกำลังกายให้กลายเป็นพลังและการเติบโต</p>
+    </div>
+  </section>
+  <section class="panel auth-card">
+    <p class="eyebrow">WELCOME BACK</p>
+    <h1>กลับมาฝึกกันต่อ</h1>
+    <p>เข้าสู่ระบบเพื่อดู Buddy และพัฒนาการของคุณ</p>
     <form method="post">
       {% csrf_token %}
       {{ form|crispy }}
-      <button class="btn btn-success" type="submit">Log in</button>
+      <button class="button button-primary button-wide" type="submit">เข้าสู่ระบบ</button>
     </form>
-    <a href="{% url 'account_reset_password' %}">Forgot Password?</a>
-  </div>
+    <a class="auth-link" href="{% url 'account_reset_password' %}">ลืมรหัสผ่าน?</a>
+    <a class="auth-link" href="{% url 'account_signup' %}">ยังไม่มีบัญชี? เริ่มเล่น BuddyFit</a>
+  </section>
 </div>
 {% endblock content %}

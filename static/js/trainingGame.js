@@ -23,8 +23,9 @@ export function createTrainingGame({exercise, title, animationKey, frames}) {
 
     this.add
       .text(300, 100, title, {
-        fontSize: "42px",
-        fontFamily: "minecraft",
+        fontSize: "34px",
+        fontFamily: "monospace",
+        fontStyle: "bold",
         fill: "#fff",
       })
       .setOrigin(0.5);
@@ -50,10 +51,11 @@ export function createTrainingGame({exercise, title, animationKey, frames}) {
     window.addEventListener("buddyfit:rep", onRep);
 
     const startButton = this.add
-      .text(300, 700, "Start", {
-        fontSize: "64px",
-        fontFamily: "minecraft",
-        fill: "#fff",
+      .text(300, 700, "START", {
+        fontSize: "48px",
+        fontFamily: "monospace",
+        fontStyle: "bold",
+        fill: "#8bd450",
       })
       .setOrigin(0.5)
       .setInteractive();
@@ -91,7 +93,7 @@ export function createTrainingGame({exercise, title, animationKey, frames}) {
       if (remaining <= 0) {
         window.clearInterval(timerInterval);
         workoutActive = false;
-        timerText.setText("Time's up!");
+          timerText.setText("FINISH!");
         window.dispatchEvent(
           new CustomEvent("buddyfit:workout-complete", {
             detail: {exercise, count: exerciseCount},

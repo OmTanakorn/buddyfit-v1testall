@@ -1,0 +1,57 @@
+{% load static %}
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">30-SECOND TRAINING</p>
+    <h1>{{ title }}</h1>
+    <p>{{ description }} กด Start บนจอ Buddy แล้วเข้าตำแหน่งก่อนนับถอยหลัง</p>
+  </div>
+  <a class="button button-ghost" href="/">← กลับหน้าหลัก</a>
+</section>
+
+<div class="workout-layout">
+  <section class="game-frame" aria-label="เกมฝึก {{ title }}">
+    <script src="https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js"></script>
+    <div id="game-container" data-background-url="{% static 'images/BG.png' %}" data-player-url="{% static 'images/Minotor.png' %}"></div>
+    <script type="module" src="{% static game_script %}"></script>
+  </section>
+
+  <div>
+    <section class="panel camera-panel">
+      <div class="camera-header">
+        <div>
+          <strong>กล้องตรวจจับท่าทาง</strong>
+          <div class="live-status"><span class="status-dot"></span><span data-camera-status>กำลังเชื่อมต่อกล้อง</span></div>
+        </div>
+        <span class="eyebrow" style="margin:0">LIVE</span>
+      </div>
+
+      <div class="camera-wrap">
+        <canvas class="output" width="600" height="600"></canvas>
+        <div class="camera-guide" aria-hidden="true"></div>
+        <div class="rep-display"><strong data-rep-count>0</strong><span>REPS</span></div>
+        <div class="camera-message" data-workout-message>จัดร่างกายให้อยู่กลางกรอบ</div>
+        <div class="loading"><div class="spinner"></div></div>
+      </div>
+
+      <div class="workout-controls">
+        <div class="exercise-switcher" aria-label="เปลี่ยนท่าออกกำลังกาย">
+          <a href="{% url 'pages:pushup' %}" {% if exercise == 'pushup' %}class="active" aria-current="page"{% endif %}>Push</a>
+          <a href="{% url 'pages:situp' %}" {% if exercise == 'situp' %}class="active" aria-current="page"{% endif %}>Sit</a>
+          <a href="{% url 'pages:squat' %}" {% if exercise == 'squat' %}class="active" aria-current="page"{% endif %}>Squat</a>
+        </div>
+
+        <form action="{% url update_url %}" method="post" data-workout-form data-exercise="{{ exercise }}">
+          {% csrf_token %}
+          <input type="hidden" name="{{ count_name }}" id="{{ count_id }}" value="0">
+          <button class="button button-primary button-wide" type="submit">บันทึกและจบการฝึก</button>
+        </form>
+      </div>
+    </section>
+
+    <p class="workout-note"><span>💡</span><span>{{ tip }} ระบบจะบันทึกเฉพาะจำนวนครั้งที่นับได้ในรอบล่าสุด</span></p>
+  </div>
+</div>
+
+<video class="input_video" width="0" height="0" style="position:absolute;visibility:hidden" muted playsinline></video>
+<script type="module" src="{% static pose_script %}"></script>
+<script type="module" src="{% static 'js/workoutForm.js' %}"></script>

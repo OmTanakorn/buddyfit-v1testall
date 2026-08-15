@@ -1,24 +1,27 @@
 {% extends '_base.html' %}
-{% load crispy_forms_tags %}
-{% load static %}
-
-{% block title %}Sign up{% endblock %}
-
+{% load crispy_forms_tags static %}
+{% block title %}สมัครสมาชิก · BuddyFit{% endblock %}
 {% block content %}
-<div class="login-container">
-  <div class="login-image">
-    <img src="{% static 'images/BG_LOGO.png' %}" alt="Login Image" style="width: 500px; height: auto;">
-  </div>
-
-  <div class="login-form">
-  <h2>Sign up</h2>
-  <form method="post">
-    {% csrf_token %}
-    {{ form|crispy }}
-
-    <input type="hidden" name="{{ redirect_field_name }}" value="/create_buddy/" />
-    <button class="btn btn-success" type="submit">Sign up</button>
-  </form>
-</div>
+<div class="auth-layout">
+  <section class="auth-visual">
+    <img src="{% static 'images/BG_LOGO.png' %}" alt="BuddyFit gym">
+    <div class="auth-visual-copy">
+      <p class="eyebrow" style="color:var(--green)">YOUR JOURNEY STARTS HERE</p>
+      <h1>หนึ่งบัญชี หนึ่ง Buddy ของคุณ</h1>
+      <p>เริ่มฝึก สะสมพลัง ปลดล็อกการเติบโต และขึ้นอันดับไปด้วยกัน</p>
+    </div>
+  </section>
+  <section class="panel auth-card">
+    <p class="eyebrow">CREATE YOUR ACCOUNT</p>
+    <h1>เริ่มต้นการเดินทาง</h1>
+    <p>สมัครสมาชิกแล้วไปฟัก Buddy ตัวแรกของคุณ</p>
+    <form method="post">
+      {% csrf_token %}
+      {{ form|crispy }}
+      <input type="hidden" name="{{ redirect_field_name }}" value="/create_buddy/">
+      <button class="button button-primary button-wide" type="submit">สมัครและสร้าง Buddy</button>
+    </form>
+    <a class="auth-link" href="{% url 'account_login' %}">มีบัญชีแล้ว? เข้าสู่ระบบ</a>
+  </section>
 </div>
 {% endblock content %}

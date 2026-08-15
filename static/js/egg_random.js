@@ -34,10 +34,11 @@ function create() {
     this.player.play('egg_random');
     
     // Add text
-    var text = this.add.text(300, 100, 'Random Buddy', {
-        fontSize: '42px',
-        fontFamily: 'minecraft',
-        fill: '#fff'
+    var text = this.add.text(300, 100, 'YOUR NEW BUDDY', {
+        fontSize: '34px',
+        fontFamily: 'monospace',
+        fontStyle: 'bold',
+        fill: '#8bd450'
     });
     text.setOrigin(0.5, 0.5);
 

@@ -1,196 +1,123 @@
 {% extends '_base.html' %}
 {% load static %}
 
-{% block title %}Home page{% endblock title %}
+{% block title %}หน้าหลัก · BuddyFit{% endblock title %}
 
 {% block content %}
-
-<div class="HQ_container">
-  
-  <div class="game-container" >
-    <script src="https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js"></script>
-    <div id="game-container" ></div>
-    
-    <script src="{% static 'js/game.js'%}"></script>
+{% for buddy in buddies %}
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">YOUR BUDDY HQ</p>
+    <h1>พร้อมขยับไปด้วยกันไหม?</h1>
+    <p>ทุกครั้งที่คุณออกกำลังกาย {{ buddy.name }} จะแข็งแรงขึ้นไปพร้อมกับคุณ</p>
   </div>
+  <a class="button button-ghost" href="{% url 'pages:ex_history' %}">ดูพัฒนาการของฉัน →</a>
+</section>
 
-  <!-- {% comment %} STUTS {% endcomment %} -->
-
-  <div id="popup" class="popup">
-    <div class="popup-content">
-      <a class="close" id="x">x</a>
-      <h2>Choose an option:</h2>
-        <button id="pushup" class="popup-btn"><img src="../static/images/Str.png" style="transform: rotate(45deg);"><h5>Push up</h5></button>
-        <button id="situp" class="popup-btn"><img src="../../static/images/End.png"><h5>Sit up</h5></button>
-        <button id="squat" class="popup-btn"><img src="../../static/images/Agi.png" style="transform: rotate(15deg);"><h5>Squat</h5></button>
-    </div>
-  </div>
-
-  <div class="buddies-container" style="margin-left: auto">
-    {% for buddy in buddies %}
-    <div class="BuddyFit">
-      <h1>Buddy Fit</h1>
-    </div>
-
-    <div class="buddy-card">
-      <h3>Name: {{ buddy.name }}</h3>
-      <h3>Challenge mode</h3>
-      <div class="ranking">
-        <button class="rank-btn" onclick="leaderboard()">Ranking</button>
-        <h4>&nbsp;Buddy high score: {{buddy.highScore}} </h4>
-      </div>
-    </div>
-  
-    <div class="status-container" >
-      <h3>Training mode</h3>
-      <div class="status-piece">
-        <img src="../../static/images/Str.png" style="transform: rotate(45deg);">
-        <div class="status-container">
-          <h5>arm-power</h5>
-          <div class="status-piece">
-            <div class="experience-bar">
-              <div id="arm-power-{{ buddy.id }}" class="experience-fill"></div>
-              <div class="status-piece" style="justify-content: space-between;">
-                <div id="arm-power-level{{ buddy.id }}"></div>
-                <div id="arm-power-exp{{ buddy.id }}"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="status-piece">
-        <img src="../../static/images/End.png" style="margin-top: 20px;">
-        <div class="status-container">
-          <h5>body-power</h5>
-          <div class="status-piece">
-            <div class="experience-bar">
-              <div id="body-power-{{ buddy.id }}" class="experience-fill"></div>
-              <div class="status-piece" style="justify-content: space-between;">
-                <div id="body-power-level{{ buddy.id }}"></div>
-                <div id="body-power-exp{{ buddy.id }}"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="status-piece">
-        <img src="../../static/images/Agi.png" style="transform: rotate(15deg);">
-        <div class="status-container">
-          <h5>leg-power</h5>
-          <div class="status-piece">
-            <div class="experience-bar">
-              <div id="leg-power-{{ buddy.id }}" class="experience-fill"></div>
-              <div class="status-piece" style="justify-content: space-between;">
-                <div id="leg-power-level{{ buddy.id }}"></div>
-                <div id="leg-power-exp{{ buddy.id }}"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <script type="text/javascript">
-      // Get the power values for the current buddy
-      const buddyName = '{{ buddy.name }}'
-      var highScore = '{{buddy.highScore}}'
-      var armPower = '{{ buddy.armpower }}';
-      var legPower = '{{ buddy.legpower }}';
-      var bodyPower = '{{ buddy.bodypower }}';
-  
-      // Calculate the level and EXP percentages for each power
+<div class="dashboard-grid">
+  <section class="buddy-stage" aria-label="ห้องของ {{ buddy.name }}">
+    <script>
+      const buddyName = '{{ buddy.name|escapejs }}';
+      const highScore = Number('{{ buddy.highScore }}');
+      const armPower = Number('{{ buddy.armpower }}');
+      const legPower = Number('{{ buddy.legpower }}');
+      const bodyPower = Number('{{ buddy.bodypower }}');
       const armLevel = Math.floor(armPower / 10);
-      const armExp = Math.floor(((armPower / 10) - armLevel) * 100);
       const bodyLevel = Math.floor(bodyPower / 10);
-      const bodyExp = Math.floor(((bodyPower / 10) - bodyLevel )* 100);
       const legLevel = Math.floor(legPower / 10);
-      const legExp = Math.floor(((legPower / 10) - legLevel) * 100);
-      
-      // Display the power values as level and % EXP
-      
-      const armPowerElem = document.getElementById("arm-power-{{ buddy.id }}");
-      // armPowerElem.textContent = `EXP ${armExp}%`;
-      const armWidthPercentage = Math.min(Math.max(armExp, 0), 100);
-      armPowerElem.style.width = `${armWidthPercentage}%`;
-      if (armWidthPercentage > 0) {
-        armPowerElem.style.backgroundColor = `rgb(${255 - armWidthPercentage * 2.55}, ${armWidthPercentage * 2.55}, 0)`;
-      } else {
-        armPowerElem.style.backgroundColor = "#ddd";
-      }
-      
-      const bodyPowerElem = document.getElementById("body-power-{{ buddy.id }}");
-      // bodyPowerElem.textContent = `EXP ${bodyExp}%`;
-      const bodyWidthPercentage = Math.min(Math.max(bodyExp, 0), 100);
-      bodyPowerElem.style.width = `${bodyWidthPercentage}%`;
-      if (bodyWidthPercentage > 0) {
-          bodyPowerElem.style.backgroundColor = `rgb(${255 - bodyWidthPercentage * 2.55}, ${bodyWidthPercentage * 2.55}, 0)`;
-      } else {
-          bodyPowerElem.style.backgroundColor = "#ddd";
-      }
-
-      const legPowerElem = document.getElementById("leg-power-{{ buddy.id }}");
-      // legPowerElem.textContent = `EXP ${legExp}%`;
-      const legWidthPercentage = Math.min(Math.max(legExp, 0), 100);
-      legPowerElem.style.width = `${legWidthPercentage}%`;
-      if (legWidthPercentage > 0) {
-          legPowerElem.style.backgroundColor = `rgb(${255 - legWidthPercentage * 2.55}, ${legWidthPercentage * 2.55}, 0)`;
-      } else {
-          legPowerElem.style.backgroundColor = "#ddd";
-      }
-
-      const armPowerElemExp = document.getElementById("arm-power-exp{{ buddy.id }}");
-      armPowerElemExp.textContent = `${armExp}%`;
-      const armPowerElemLevel = document.getElementById("arm-power-level{{ buddy.id }}");
-      armPowerElemLevel.textContent = `LEVEL ${armLevel}`;
-
-      const bodyPowerElemExp = document.getElementById("body-power-exp{{ buddy.id }}");
-      bodyPowerElemExp.textContent = `${bodyExp}%`;
-      const bodyPowerElemLevel = document.getElementById("body-power-level{{ buddy.id }}");
-      bodyPowerElemLevel.textContent = `LEVEL ${bodyLevel}`;
-
-      const legPowerElemExp = document.getElementById("leg-power-exp{{ buddy.id }}");
-      legPowerElemExp.textContent = `${legExp}%`;
-      const legPowerElemLevel = document.getElementById("leg-power-level{{ buddy.id }}");
-      legPowerElemLevel.textContent = `LEVEL ${legLevel}`;
-
-      function leaderboard() {
-        window.location.href = '/leaderboard/';
-      }    
-
-      function redirectToChallenge() {
-        // ใช้ window.location.href เพื่อเปลี่ยนพาท
-        window.location.href = '/challenge/'; // หรือหากต้องการพาทอื่น ๆ คุณสามารถแก้ไขตามความเหมาะสม
-      }    
-
-      function showPopup() {
-        // Show the popup
-        document.getElementById("popup").style.display = "block";
-      
-        // Set onclick events for the buttons
-        document.getElementById("pushup").onclick = function() {
-          window.location.href = "/pushup"; // Redirect to option1 page
-        };
-        document.getElementById("situp").onclick = function() {
-          window.location.href = "/situp"; // Redirect to option2 page
-        };
-        document.getElementById("squat").onclick = function() {
-          window.location.href = "/squat"; // Redirect to option3 page
-        };
-        document.getElementById("x").onclick = function() {
-          window.location.href = "/"; // Redirect to option3 page
-        };
-      }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js"></script>
+    <div id="game-container"></div>
+    <script src="{% static 'js/game.js' %}"></script>
+    <div class="buddy-stage-footer">
+      <div>
+        <strong>{{ buddy.name }}</strong>
+        <span>คู่หูสาย {{ buddy.skinname|title }} · High score {{ buddy.highScore }}</span>
+      </div>
+      <span class="level-chip" id="overall-level">LV. 0</span>
+    </div>
+  </section>
 
-    <br />
-    <button class="challenge-btn" onclick="redirectToChallenge()"><h1>Challenge</h1></button>
-    <br />
-    <br />
-    <button class="train-btn" onclick="showPopup()"><h1>Train</h1></button>
-  
-    {% endfor %}
-    
+  <div class="dashboard-side">
+    <section class="panel welcome-card">
+      <p class="eyebrow">TODAY'S MISSION</p>
+      <h1>เริ่มจากหนึ่งเซตก็เก่งขึ้นได้</h1>
+      <p>เลือกท่าที่อยากฝึก กล้องจะช่วยนับจำนวนครั้งให้โดยอัตโนมัติ</p>
+    </section>
+
+    <section class="panel quick-training">
+      <div class="section-title">
+        <h2>เลือกการฝึก</h2>
+        <span class="live-status"><span class="status-dot"></span> AI pose tracking</span>
+      </div>
+      <div class="exercise-grid">
+        <a class="exercise-card" href="{% url 'pages:pushup' %}">
+          <img src="{% static 'images/Str.png' %}" alt="">
+          <span><strong>Push-up</strong><small>เพิ่มพลังแขน</small></span>
+        </a>
+        <a class="exercise-card" href="{% url 'pages:situp' %}">
+          <img src="{% static 'images/End.png' %}" alt="">
+          <span><strong>Sit-up</strong><small>เพิ่มพลังลำตัว</small></span>
+        </a>
+        <a class="exercise-card" href="{% url 'pages:squat' %}">
+          <img src="{% static 'images/Agi.png' %}" alt="">
+          <span><strong>Squat</strong><small>เพิ่มพลังขา</small></span>
+        </a>
+      </div>
+    </section>
+
+    <section class="panel stats-card">
+      <div class="section-title">
+        <h2>พลังของ {{ buddy.name }}</h2>
+        <a href="{% url 'pages:ex_history' %}">ดูสถิติ</a>
+      </div>
+      <div class="power-list">
+        <div class="power-row">
+          <div class="power-icon"><img src="{% static 'images/Str.png' %}" alt=""></div>
+          <div>
+            <div class="power-header"><span>พลังแขน · STR</span><span id="arm-power-label">LV. 0</span></div>
+            <div class="experience-bar"><div id="arm-power" class="experience-fill"></div></div>
+          </div>
+        </div>
+        <div class="power-row">
+          <div class="power-icon"><img src="{% static 'images/End.png' %}" alt=""></div>
+          <div>
+            <div class="power-header"><span>พลังลำตัว · END</span><span id="body-power-label">LV. 0</span></div>
+            <div class="experience-bar"><div id="body-power" class="experience-fill"></div></div>
+          </div>
+        </div>
+        <div class="power-row">
+          <div class="power-icon"><img src="{% static 'images/Agi.png' %}" alt=""></div>
+          <div>
+            <div class="power-header"><span>พลังขา · AGI</span><span id="leg-power-label">LV. 0</span></div>
+            <div class="experience-bar"><div id="leg-power" class="experience-fill"></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="dashboard-actions">
+      <a class="button button-challenge" href="{% url 'pages:challenge' %}">⚔ ท้าทายบอส</a>
+      <a class="button button-secondary" href="{% url 'pages:leaderboard' %}">♛ อันดับ</a>
+    </div>
   </div>
+</div>
+
+<script>
+  const powerRows = [
+    {power: armPower, level: armLevel, bar: 'arm-power', label: 'arm-power-label'},
+    {power: bodyPower, level: bodyLevel, bar: 'body-power', label: 'body-power-label'},
+    {power: legPower, level: legLevel, bar: 'leg-power', label: 'leg-power-label'},
+  ];
+
+  powerRows.forEach(({power, level, bar, label}) => {
+    const exp = power % 10;
+    document.getElementById(bar).style.width = `${exp * 10}%`;
+    document.getElementById(label).textContent = `LV. ${level} · ${exp}/10`;
+  });
+
+  const overallLevel = Math.floor((armLevel + bodyLevel + legLevel) / 3);
+  document.getElementById('overall-level').textContent = `LV. ${overallLevel}`;
+</script>
+{% endfor %}
 {% endblock content %}
