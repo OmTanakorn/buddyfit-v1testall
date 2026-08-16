@@ -42,7 +42,7 @@
 
         <form action="{% url update_url %}" method="post" data-workout-form data-exercise="{{ exercise }}">
           {% csrf_token %}
-          <input type="hidden" name="{{ count_name }}" id="{{ count_id }}" value="0">
+          <input type="hidden" name="{{ count_name }}" id="{{ count_id }}" value="0" data-workout-count>
           <button class="button button-primary button-wide" type="submit">บันทึกและจบการฝึก</button>
         </form>
       </div>

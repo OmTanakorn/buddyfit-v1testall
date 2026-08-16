@@ -2,14 +2,14 @@ const form = document.querySelector("[data-workout-form]");
 
 if (form) {
   const exercise = form.dataset.exercise;
-  const input = form.querySelector("input[type='hidden']");
+  const countInput = form.querySelector("[data-workout-count]");
   const countOutput = document.querySelector("[data-rep-count]");
   const messageOutput = document.querySelector("[data-workout-message]");
   const cameraStatus = document.querySelector("[data-camera-status]");
 
   const syncCount = (event) => {
     if (event.detail.exercise === exercise) {
-      input.value = event.detail.count;
+      countInput.value = event.detail.count;
       if (countOutput) countOutput.textContent = event.detail.count;
       if (messageOutput) messageOutput.textContent = "เยี่ยมมาก! รักษาจังหวะนี้ไว้";
     }
