@@ -1,76 +1,85 @@
 {% extends '_base.html' %}
 {% load static %}
 
+{% block title %}สถิติการฝึก · BuddyFit{% endblock title %}
+
 {% block content %}
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">YOUR PROGRESS</p>
+    <h1>ทุกครั้งที่ขยับ คือพัฒนาการ</h1>
+    <p>ดูความสม่ำเสมอและจำนวนครั้งที่คุณฝึกในแต่ละวัน</p>
+  </div>
+  <a class="button button-primary" href="{% url 'pages:pushup' %}">เริ่มฝึกวันนี้</a>
+</section>
 
-<h1>Exercise History</h1>
+<div class="summary-grid">
+  <article class="panel summary-card"><small>จำนวนทั้งหมด</small><strong id="total-reps">0</strong><span>ครั้ง</span></article>
+  <article class="panel summary-card"><small>Push-up</small><strong id="pushup-total">0</strong><span>ครั้ง</span></article>
+  <article class="panel summary-card"><small>Sit-up</small><strong id="situp-total">0</strong><span>ครั้ง</span></article>
+  <article class="panel summary-card"><small>Squat</small><strong id="squat-total">0</strong><span>ครั้ง</span></article>
+</div>
+
+<section class="panel chart-panel">
+  <div class="section-title">
+    <div>
+      <h2>จำนวนครั้งแยกตามวัน</h2>
+      <small style="color:var(--muted)">เปรียบเทียบการฝึกทั้งสามรูปแบบ</small>
+    </div>
+    <div class="chart-legend" aria-hidden="true">
+      <span><i class="legend-dot" style="background:#8bd450"></i>Push-up</span>
+      <span><i class="legend-dot" style="background:#f16f9d"></i>Sit-up</span>
+      <span><i class="legend-dot" style="background:#4aa9ff"></i>Squat</span>
+    </div>
+  </div>
+  <div class="chart-wrap"><canvas id="exerciseChart"></canvas></div>
+</section>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
-
-<canvas id="pushupChart" width="400" height="200"></canvas>
 <script>
-    var pushupData = {{ pushup_data|safe }};
-    var situpData = {{ situp_data|safe }};
-    var squatData = {{ squat_data|safe }};
+  const pushupData = {{ pushup_data|safe }};
+  const situpData = {{ situp_data|safe }};
+  const squatData = {{ squat_data|safe }};
 
-    pushupData.forEach(function (entry) {
-        entry.date = new Date(entry.date);
-    });
+  const total = (entries) => entries.reduce((sum, entry) => sum + Number(entry.count), 0);
+  const totals = {
+    pushup: total(pushupData),
+    situp: total(situpData),
+    squat: total(squatData),
+  };
+  document.getElementById('pushup-total').textContent = totals.pushup.toLocaleString();
+  document.getElementById('situp-total').textContent = totals.situp.toLocaleString();
+  document.getElementById('squat-total').textContent = totals.squat.toLocaleString();
+  document.getElementById('total-reps').textContent = (totals.pushup + totals.situp + totals.squat).toLocaleString();
 
-    situpData.forEach(function (entry) {
-        entry.date = new Date(entry.date);
-    });
+  const dates = [...new Set([...pushupData, ...situpData, ...squatData].map((entry) => entry.date))].sort();
+  const valuesByDate = (entries) => {
+    const values = entries.reduce((result, entry) => {
+      result[entry.date] = (result[entry.date] || 0) + Number(entry.count);
+      return result;
+    }, {});
+    return dates.map((date) => values[date] || 0);
+  };
 
-    squatData.forEach(function (entry) {
-        entry.date = new Date(entry.date);
-    });
-
-    var ctx = document.getElementById('pushupChart').getContext('2d');
-    var myLineChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: pushupData.map(function (entry) { return entry.date.toLocaleDateString(); }),
-            datasets: [
-                {
-                    label: 'Pushup Count',
-                    data: pushupData.map(function (entry) { return entry.count; }),
-                    fill: false,
-                    borderColor: 'rgb(75, 192, 192)',
-                    tension: 0.1
-                },
-                {
-                    label: 'Situp Count',
-                    data: situpData.map(function (entry) { return entry.count; }),
-                    fill: false,
-                    borderColor: 'rgb(255, 99, 132)',
-                    tension: 0.1
-                },
-                {
-                    label: 'Squat Count',
-                    data: squatData.map(function (entry) { return entry.count; }),
-                    fill: false,
-                    borderColor: 'rgb(54, 162, 235)',
-                    tension: 0.1
-                }
-            ]
-        },
-        options: {
-            scales: {
-                x: {
-                    display: true,
-                    title: {
-                        display: true,
-                        text: 'Date'
-                    }
-                },
-                y: {
-                    display: true,
-                    title: {
-                        display: true,
-                        text: 'Exercise Count'
-                    }
-                }
-            }
-        }
-    });
+  new Chart(document.getElementById('exerciseChart'), {
+    type: 'line',
+    data: {
+      labels: dates.map((date) => new Date(`${date}T00:00:00`).toLocaleDateString('th-TH', {day: 'numeric', month: 'short'})),
+      datasets: [
+        {label: 'Push-up', data: valuesByDate(pushupData), borderColor: '#6bb534', backgroundColor: 'rgba(139,212,80,.12)', pointBackgroundColor: '#6bb534', tension: .35, borderWidth: 3},
+        {label: 'Sit-up', data: valuesByDate(situpData), borderColor: '#f16f9d', backgroundColor: 'rgba(241,111,157,.1)', pointBackgroundColor: '#f16f9d', tension: .35, borderWidth: 3},
+        {label: 'Squat', data: valuesByDate(squatData), borderColor: '#4aa9ff', backgroundColor: 'rgba(74,169,255,.1)', pointBackgroundColor: '#4aa9ff', tension: .35, borderWidth: 3},
+      ],
+    },
+    options: {
+      maintainAspectRatio: false,
+      interaction: {mode: 'index', intersect: false},
+      plugins: {legend: {display: false}},
+      scales: {
+        x: {grid: {display: false}, ticks: {color: '#68738a'}},
+        y: {beginAtZero: true, grid: {color: '#edf0f5'}, ticks: {color: '#68738a', precision: 0}},
+      },
+    },
+  });
 </script>
-{% endblock %}
+{% endblock content %}

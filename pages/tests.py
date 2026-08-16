@@ -1,7 +1,9 @@
 import json
 from datetime import date
+from pathlib import Path
 
 from django.contrib.auth import get_user_model
+from django.contrib.staticfiles import finders
 from django.db import IntegrityError, transaction
 from django.test import TestCase, override_settings
 from django.urls import reverse
@@ -116,7 +118,7 @@ class TrainingPageTests(BuddyTestCase):
                 self.assertEqual(response.status_code, 200)
                 self.assertTemplateUsed(response, template)
                 self.assertEqual(list(response.context["buddies"]), [self.buddy])
-                self.assertContains(response, "phaser@3.90.0")
+                self.assertContains(response, "phaser@4.2.1")
                 self.assertContains(response, 'type="module"')
                 self.assertNotContains(response, "@mediapipe/pose")
                 self.assertNotContains(response, "sessionStorage")
@@ -126,6 +128,35 @@ class TrainingPageTests(BuddyTestCase):
         self.assertContains(response, "fetch(form.action")
         self.assertNotContains(response, "jquery")
         self.assertNotContains(response, "$.ajax")
+
+    def test_workout_count_input_is_not_confused_with_the_csrf_token(self):
+        for name in ["pages:pushup", "pages:situp", "pages:squat"]:
+            with self.subTest(view=name):
+                response = self.client.get(reverse(name))
+                self.assertContains(response, "data-workout-count")
+
+        script_path = finders.find("js/workoutForm.js")
+        self.assertIsNotNone(script_path)
+        script = Path(script_path).read_text(encoding="utf-8")
+        self.assertIn('form.querySelector("[data-workout-count]")', script)
+        self.assertNotIn('form.querySelector("input[type=\'hidden\']")', script)
+
+    def test_challenge_running_sprite_uses_the_aligned_three_frame_asset(self):
+        asset_path = Path(__file__).resolve().parents[1] / (
+            "static/images/assets/challenge/Momotaros_run_v2.png"
+        )
+        png = asset_path.read_bytes()
+        self.assertEqual(png[:8], b"\x89PNG\r\n\x1a\n")
+        self.assertEqual(
+            (int.from_bytes(png[16:20], "big"), int.from_bytes(png[20:24], "big")),
+            (432, 192),
+        )
+        self.assertEqual(png[25], 6)  # RGBA เพื่อให้พื้นหลัง sprite โปร่งใส
+
+        script_path = finders.find("js/gameChallengeStart.js")
+        self.assertIsNotNone(script_path)
+        script = Path(script_path).read_text(encoding="utf-8")
+        self.assertIn("Momotaros_run_v2.png", script)
 
 
 class CreateBuddyTests(BaseTestCase):

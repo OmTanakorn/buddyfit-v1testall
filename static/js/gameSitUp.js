@@ -2,7 +2,7 @@ import {createTrainingGame} from "./trainingGame.js";
 
 createTrainingGame({
   exercise: "situp",
-  title: "SitUp bro",
+  title: "SIT-UP TRAINING",
   animationKey: "situp",
   frames: {start: 4, end: 6},
 });

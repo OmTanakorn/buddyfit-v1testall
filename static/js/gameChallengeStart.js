@@ -26,7 +26,7 @@ class gameStart extends Phaser.Scene {
 
         this.load.image("HP", "../static/images/assets/challenge/HP_bar.png")
         
-        this.load.spritesheet("player" , "../static/images/assets/challenge/Momotaros_run.png",
+        this.load.spritesheet("player" , "../static/images/assets/challenge/Momotaros_run_v2.png",
                                     {frameWidth:144, frameHeight:192 ,startFrame:0 ,endFrame:2});
         this.load.spritesheet("player_jump" , "../static/images/assets/challenge/Momotaros_jump.png",
                                     {frameWidth:152, frameHeight:192 ,startFrame:0 ,endFrame:3});                            
@@ -66,5 +66,4 @@ class gameStart extends Phaser.Scene {
 
     }
 }
-
 

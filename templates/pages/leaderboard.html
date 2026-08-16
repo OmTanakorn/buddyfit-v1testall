@@ -1,40 +1,51 @@
 {% extends '_base.html' %}
-
 {% load static %}
 
-{% block title %}Leaderboard{% endblock title %}
+{% block title %}อันดับ · BuddyFit{% endblock title %}
+
 {% block content %}
-<div class="HQ_container">
-    <div class="game-container">
-        <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
-        <div id="game-container"></div>
-        <script src="{%static 'js/Leader.js'%}"></script>
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">GLOBAL RANKING</p>
+    <h1>ทำลายสถิติ แล้วขึ้นไปยืนบนโพเดียม</h1>
+    <p>อันดับวัดจากคะแนนสูงสุดใน Challenge Mode</p>
+  </div>
+  {% if user.is_authenticated %}<a class="button button-challenge" href="{% url 'pages:challenge' %}">⚔ ทำคะแนนใหม่</a>{% endif %}
+</section>
+
+<div class="leaderboard-layout">
+  <section class="leaderboard-scene" aria-label="Leaderboard scene">
+    <script src="https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js"></script>
+    <div id="game-container"></div>
+    <script src="{% static 'js/Leader.js' %}"></script>
+  </section>
+
+  <section class="panel leaderboard-panel">
+    <div class="podium">
+      {% for buddy in buddies|slice:':3' %}
+      <article class="podium-item {% if forloop.counter == 1 %}first{% elif forloop.counter == 2 %}second{% else %}third{% endif %}">
+        <span class="podium-rank">{% if forloop.counter == 1 %}♛{% else %}{{ forloop.counter }}{% endif %}</span>
+        <strong>{{ buddy.name }}</strong>
+        <small>{{ buddy.highScore }} pts</small>
+      </article>
+      {% empty %}
+      <article class="podium-item first"><span class="podium-rank">♛</span><strong>รอผู้ท้าชิง</strong><small>0 pts</small></article>
+      {% endfor %}
     </div>
-    
-    <div class="Leader_container">
-        <div class="leader_name">ranking</div>
-        <div class="leader_board">
-            <div class="ribbon"></div>
-            <table>
-                {% for buddy in buddies %}
-                    {% if forloop.counter <= 10 %}
-                        <tr>
-                            <td class="number">{{ forloop.counter }}</td>
-                            <td class="name"> {{ buddy.name }}</td>
-                            {% if forloop.counter == 1 %}
-                                <td class="scores">
-                                    {{ buddy.highScore }}
-                                    <img class="gold-medal" src="https://github.com/malunaridev/Challenges-iCodeThis/blob/master/4-leaderboard/assets/gold-medal.png?raw=true" alt="gold medal" />
-                                </td>
-                            {% else %}
-                                <td class="scores">{{ buddy.highScore }}</td>
-                            {% endif %}
-                        </tr>
-                    {% endif %}
-                {% endfor %}
-            </table>
-        </div>
-    </div>
+
+    <table class="ranking-list">
+      <tbody>
+        {% for buddy in buddies|slice:':10' %}
+        <tr>
+          <td class="rank-number">#{{ forloop.counter }}</td>
+          <td class="rank-name">{{ buddy.name }}</td>
+          <td class="rank-score">{{ buddy.highScore }} pts</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3" style="text-align:center;color:var(--muted)">ยังไม่มีคะแนนใน Leaderboard</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
 </div>
-    
-{% endblock content %}  
+{% endblock content %}

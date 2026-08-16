@@ -1,7 +1,7 @@
 # HANDOFF — BuddyFit revival
 
 เอกสารส่งต่องานสำหรับคนที่มารับช่วงต่อ
-อัปเดตล่าสุด: 11 ส.ค. 2026 · branch `fix/challenge-game`
+อัปเดตล่าสุด: 11 ส.ค. 2026 · branch `feature/phaser-4-migration`
 
 ---
 
@@ -12,7 +12,7 @@
 | 0 | เขียน test คลุมพฤติกรรมเดิม | ✅ |
 | 1 | อัป Django + dependencies + settings ขับด้วย env | ✅ |
 | 2 | MediaPipe Tasks Vision + pose/game event bridge | ✅ |
-| 3 | Phaser 3.90, Chart.js 4, Bootstrap 5.3, ตัด jQuery | ✅ |
+| 3 | Phaser 4.2.1, Chart.js 4, Bootstrap 5.3, ตัด jQuery | ✅ |
 | 4 | deploy จริงบน HTTPS | ⬜ ต้องมี domain/credentials ของ environment จริง |
 
 ### stack ปัจจุบัน
@@ -24,7 +24,7 @@
 | Django | 5.2.17 LTS |
 | django-allauth | 65.19 |
 | MediaPipe | `@mediapipe/tasks-vision@0.10.35` + Pose Landmarker Full |
-| Phaser | 3.90.0 |
+| Phaser | 4.2.1 |
 | Chart.js | 4.5.1 |
 | Bootstrap | 5.3.8 |
 
@@ -102,7 +102,9 @@ uv run python manage.py check --deploy
 
 ### Frontend และ tooling
 
-- Phaser 3.90.0, Chart.js 4.5.1 และ Bootstrap 5.3.8 ใช้ URL แบบ pin version
+- Phaser 4.2.1, Chart.js 4.5.1 และ Bootstrap 5.3.8 ใช้ URL แบบ pin version
+- เปลี่ยน Phaser renderer จาก `CANVAS` เป็น `AUTO` เพื่อให้ Phaser 4 เลือก WebGL
+  เมื่ออุปกรณ์รองรับ และ fallback ไป Canvas ได้
 - ตัด jQuery ออกและใช้ `fetch()` สำหรับบันทึกคะแนนก่อน replay
 - ลบ `static/js/phaser.js` ที่ไม่เคยถูกอ้างถึง (ประมาณ 217,000 บรรทัด)
 - asset URL ของเกมฝึกส่งจาก `{% static %}` ผ่าน `data-*` เพื่อให้ได้ cache busting

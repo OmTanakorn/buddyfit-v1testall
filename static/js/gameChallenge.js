@@ -256,6 +256,13 @@ class gamec extends Phaser.Scene {
 
         // ใช้ delta เพื่อให้ความเร็วเท่ากันบนจอ 60/120Hz และเร่งตามคะแนน
         this.runSpeed = Math.min(500, 340 + (this.score * 0.18));
+        // asset วิ่งออกแบบที่ 12 FPS สำหรับความเร็วฐาน 340 px/s
+        // จึงเร่งรอบขาตามความเร็วเกมเพื่อลดอาการเท้าไถลเมื่อเกมเร็วขึ้น
+        this.player.anims.timeScale = (
+            this.player.anims.currentAnim?.key === 'run_anim'
+                ? this.runSpeed / 340
+                : 1
+        );
         const scrollStep = (this.runSpeed * delta) / 1000;
         this.sky.tilePositionX += scrollStep * 0.08;
         this.sky2.tilePositionX += scrollStep * 0.22;

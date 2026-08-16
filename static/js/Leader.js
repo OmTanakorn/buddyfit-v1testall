@@ -1,5 +1,5 @@
 const config = {
-        type: Phaser.CANVAS,
+        type: Phaser.AUTO,
 		scale: {
 			width: 600,
 			height: 890,
@@ -24,7 +24,7 @@ const config = {
 		// Create the character page
 		// Add background image
 		const BG = this.add.image(this.scale.width/2, this.scale.height/2, 'background')
-		this.player = this.add.sprite(300, 400, 'player')
+		this.player = this.add.sprite(300, 400, 'minotor')
 
 		this.anims.create({
 			key:'move',

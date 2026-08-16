@@ -1,80 +1,81 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111827">
   <title>{% block title %}BuddyFit{% endblock title %}</title>
   <link rel="shortcut icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
 
   {% block css %}
-  <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   {% endblock %}
 </head>
 
 <body>
-  <header class="p-3 mb-2 border-bottom">
-    <div class="container">
-      <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-        <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-dark text-decoration-none">
-          <svg class="bi me-2" width="40" height="32" role="img" aria-label="Bootstrap">
-            <use xlink:href="#bootstrap" />
-          </svg>
-        </a>
+  <header class="app-header">
+    <div class="app-shell header-inner">
+      <a class="brand" href="/" aria-label="BuddyFit home">
+        <span class="brand-mark" aria-hidden="true">BF</span>
+        <span>
+          <strong>BuddyFit</strong>
+          <small>LEVEL UP TOGETHER</small>
+        </span>
+      </a>
 
-        <div class="logo">
-          <a href="/">
-            <img src="{% static "images/Home.png" %}" width="10%" height="10%">
-          </a>
+      {% if user.is_authenticated %}
+      <nav class="desktop-nav" aria-label="เมนูหลัก">
+        <a href="/" {% if request.path == '/' %}class="active" aria-current="page"{% endif %}>หน้าหลัก</a>
+        <a href="{% url 'pages:pushup' %}" {% if '/pushup' in request.path or '/situp' in request.path or '/squat' in request.path %}class="active" aria-current="page"{% endif %}>ฝึก</a>
+        <a href="{% url 'pages:ex_history' %}" {% if '/ex_history' in request.path %}class="active" aria-current="page"{% endif %}>สถิติ</a>
+        <a href="{% url 'pages:leaderboard' %}" {% if '/leaderboard' in request.path %}class="active" aria-current="page"{% endif %}>อันดับ</a>
+      </nav>
+      {% endif %}
+
+      <div class="account-menu dropdown">
+        {% if user.is_authenticated %}
+        <button class="profile-button dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <span class="profile-avatar">{{ user.email|first|upper }}</span>
+          <span class="profile-email">{{ user.email }}</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li><a class="dropdown-item" href="{% url 'account_change_password' %}">เปลี่ยนรหัสผ่าน</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item text-danger" href="{% url 'account_logout' %}">ออกจากระบบ</a></li>
+        </ul>
+        {% else %}
+        <div class="auth-actions">
+          <a href="{% url 'account_login' %}" class="button button-ghost button-small">เข้าสู่ระบบ</a>
+          <a href="{% url 'account_signup' %}" class="button button-primary button-small">เริ่มเล่น</a>
         </div>
-        
-        <div class="dropdown text-end ms-auto">
-          {% if user.is_authenticated %}
-          <a href="#" class="d-block link-dark text-decoration-none dropdown-toggle" data-bs-toggle="dropdown"
-            aria-expanded="false">
-            {{ user.email }}
-          </a>
-          <ul class="dropdown-menu text-small">
-            <li><a class="dropdown-item" href="{% url 'account_change_password' %}">Change password</a></li>
-            <li>
-              <hr class="dropdown-divider">
-            </li>
-            <li><a class="dropdown-item" href="{% url 'account_logout' %}">Sign out</a></li>
-          </ul>
-          {% else %}
-          <div class="btn-group" role="group" aria-label="Button group for unauthenticated users">
-            <a href="{% url 'account_login' %}" class="btn btn-outline-secondary">Log in</a>
-            <a href="{% url 'account_signup' %}" class="btn btn-primary ml-2">Sign up</a>
-          </div>
-          {% endif %}
-        </div>
+        {% endif %}
       </div>
     </div>
   </header>
 
-  <div class="container">
-    {% block content %}
-    <p>Default content...</p>
-    {% endblock content %}
-  </div>
+  <main class="app-shell app-main">
+    {% block content %}{% endblock content %}
+  </main>
+
+  {% if user.is_authenticated %}
+  <nav class="mobile-nav" aria-label="เมนูมือถือ">
+    <a href="/" {% if request.path == '/' %}class="active"{% endif %}><span>⌂</span>หน้าหลัก</a>
+    <a href="{% url 'pages:pushup' %}" {% if '/pushup' in request.path or '/situp' in request.path or '/squat' in request.path %}class="active"{% endif %}><span>↟</span>ฝึก</a>
+    <a href="{% url 'pages:ex_history' %}" {% if '/ex_history' in request.path %}class="active"{% endif %}><span>▥</span>สถิติ</a>
+    <a href="{% url 'pages:leaderboard' %}" {% if '/leaderboard' in request.path %}class="active"{% endif %}><span>♛</span>อันดับ</a>
+  </nav>
+  {% endif %}
 
   {% block javascript %}
-  <!-- Bootstrap JavaScript -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
     crossorigin="anonymous"></script>
-
-  <!-- Project JS -->
   <script src="{% static 'js/base.js' %}"></script>
-
   {% endblock javascript %}
-
 </body>
 
 </html>
