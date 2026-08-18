@@ -41,23 +41,23 @@ class gameStart extends Phaser.Scene {
         const bg2 = this.add.image(400, 300, 'sky2'); // Adjust position as needed
         bg1.setScale(3);
         bg2.setScale(3);
-        this.add.image(400,200,'Logo');
-        // Create the "START" button
-        const startButton = this.add.image(400, 400, 'start1')
-        startButton.setScale(1);
+        const logo = this.add.image(400, 190, 'Logo');
+        logo.setScale(0.95);
 
+        // Create the "START" button
+        const startButton = this.add.image(400, 420, 'start1');
+        startButton.setScale(1);
         startButton.setOrigin(0.5);
-        startButton.setInteractive();
+        startButton.setInteractive({ cursor: 'pointer' });
 
         startButton.on('pointerout', () => {
-            startButton.setTexture('start1'); // เปลี่ยนภาพเป็น 'start1' เมื่อเมาส์ออกนอกปุ่ม
+            startButton.setTexture('start1');
         });
-        startButton.on('pointerover',()=>{
+        startButton.on('pointerover', () => {
             startButton.setTexture('start2');
-        })
+        });
         // Handle start button click event
         startButton.on('pointerdown', () => {
-
             this.scene.start("gamec"); // Start the "gamec" scene when the button is clicked
         });
     }
